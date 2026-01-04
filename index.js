@@ -1,5 +1,14 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
+const http = require("http");
+const PORT = process.env.PORT || 3000;
+
+http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end("Bot is running!");
+}).listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
 const unzipper = require("unzipper");
 
 const zipPath = "./flag-cards.zip";
@@ -27,6 +36,7 @@ function extractFlags() {
             });
     });
 }
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -296,7 +306,7 @@ client.on('messageCreate', message => {
                 clearTimeout(game.timeout);
             }
 
-            message.reply(`🎉 إجابة صحيحة! **${message.author}** شطوووور!\n✅ الإجابة: **${game.country.name}**\n⏱️ الوقت: **${timeTaken}** ثانية`);
+            message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
             activeGames.delete(message.channel.id);
         }
     }
@@ -307,7 +317,9 @@ client.on('messageCreate', message => {
             .setTitle('📖 قائمة الأوامر')
             .setDescription('**أوامر بوت الأعلام:**')
             .addFields(
-                { name: '-اعلام أو !flag', value: 'بدء لعبة تخمين العلم', inline: false },
+                { name: '-اعلام أو !flag', value: 'بدء لعبة علم واحد', inline: false },
+                { name: '-ايفنت اعلام أو !event flags', value: 'بدء إيفنت متعدد الجولات', inline: false },
+                { name: '-الغاء ايفنت أو !cancel event', value: 'إلغاء الإيفنت النشط', inline: false },
                 { name: '!مساعدة أو !help', value: 'عرض هذه القائمة', inline: false }
             )
             .setColor('#3498db')
@@ -317,6 +329,7 @@ client.on('messageCreate', message => {
     }
 });
 
+// تسجيل الدخول - ضع التوكن هنا
 (async () => {
     try {
         await extractFlags(); // ننتظر لحد ما يخلص فك الضغط
