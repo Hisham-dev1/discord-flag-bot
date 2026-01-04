@@ -5,14 +5,15 @@ const unzipper = require("unzipper");
 const zipPath = "./flag-cards.zip";
 const extractPath = "./flag-cards";
 
-if (!fs.existsSync(extractPath)) {
-  fs.createReadStream(zipPath)
-    .pipe(unzipper.Extract({ path: extractPath }))
-    .on("close", () => {
-      console.log("Images extracted successfully");
-    });
-}
+// فك الضغط عن مجلد الأعلام إذا لم يكن موجودًا
 
+if (!fs.existsSync(extractPath)) {
+    fs.createReadStream(zipPath)
+        .pipe(unzipper.Extract({ path: extractPath }))
+        .on("close", () => {
+            console.log("Images extracted successfully");
+        });
+}
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -164,7 +165,7 @@ const countries = [
     { name: 'كوستاريكا', flag: './flag-cards/cr.png', alternatives: ['costa rica', 'كوستاريكا'] },
     { name: 'بنما', flag: './flag-cards/pa.png', alternatives: ['panama', 'بنما'] },
     { name: 'بليز', flag: './flag-cards/bz.png', alternatives: ['belize', 'بليز'] },
-    { name: 'جزر البهاما', flag: './flag-cards/bs.png', alternatives: ['bahamas', 'باهاماس', 'البهاما'] },
+    { name: 'باهاماس', flag: './flag-cards/bs.png', alternatives: ['bahamas', 'باهاماس'] },
     { name: 'باربادوس', flag: './flag-cards/bb.png', alternatives: ['barbados', 'باربادوس'] },
     { name: 'ترينيداد', flag: './flag-cards/tt.png', alternatives: ['trinidad and tobago', 'ترينيداد'] },
 
@@ -214,7 +215,7 @@ const countries = [
 // تخزين اللعبة النشطة لكل قناة
 const activeGames = new Map();
 
-client.once('clientReady', () => {
+client.once('ready', () => {
     console.log(`✅ البوت شغال! تم تسجيل الدخول كـ ${client.user.tag}`);
     console.log(`🎮 عدد الأعلام المتاحة: ${countries.length} علم`);
 });
@@ -232,12 +233,6 @@ client.on('messageCreate', message => {
 
         // اختيار دولة عشوائية
         const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-
-        // التحقق من وجود الملف
-        if (!fs.existsSync(randomCountry.flag)) {
-            message.reply('❌ خطأ: الملف غير موجود! تأكد من تشغيل سكريبت create-flag-cards.js');
-            return;
-        }
 
         // حفظ اللعبة النشطة
         activeGames.set(message.channel.id, {
@@ -288,7 +283,7 @@ client.on('messageCreate', message => {
                 clearTimeout(game.timeout);
             }
 
-            message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور`);
+            message.reply(`🎉 إجابة صحيحة! **${message.author}** شطوووور!\n✅ الإجابة: **${game.country.name}**\n⏱️ الوقت: **${timeTaken}** ثانية`);
             activeGames.delete(message.channel.id);
         }
     }
@@ -311,6 +306,3 @@ client.on('messageCreate', message => {
 
 // تسجيل الدخول - ضع التوكن هنا
 client.login(process.env.TOKEN);
-
-
-
