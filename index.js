@@ -13,7 +13,6 @@ if (!fs.existsSync(extractPath)) {
     });
 }
 
-require('dotenv').config();
 
 const client = new Client({
     intents: [
@@ -313,4 +312,5 @@ client.on('messageCreate', message => {
 
 // تسجيل الدخول - ضع التوكن هنا
 client.login(process.env.TOKEN);
+
 
