@@ -13,7 +13,6 @@ if (!fs.existsSync(extractPath)) {
     });
 }
 
-
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -312,5 +311,6 @@ client.on('messageCreate', message => {
 
 // تسجيل الدخول - ضع التوكن هنا
 client.login(process.env.TOKEN);
+
 
 
