@@ -5,14 +5,27 @@ const unzipper = require("unzipper");
 const zipPath = "./flag-cards.zip";
 const extractPath = "./flag-cards";
 
-// فك الضغط عن مجلد الأعلام إذا لم يكن موجودًا
+// دالة فك الضغط مع Promise
+function extractFlags() {
+    return new Promise((resolve, reject) => {
+        if (fs.existsSync(extractPath)) {
+            console.log('✅ مجلد الأعلام موجود مسبقاً');
+            resolve();
+            return;
+        }
 
-if (!fs.existsSync(extractPath)) {
-    fs.createReadStream(zipPath)
-        .pipe(unzipper.Extract({ path: extractPath }))
-        .on("close", () => {
-            console.log("Images extracted successfully");
-        });
+        console.log('🔄 جاري فك ضغط الأعلام...');
+        fs.createReadStream(zipPath)
+            .pipe(unzipper.Extract({ path: extractPath }))
+            .on('close', () => {
+                console.log('✅ تم فك ضغط الأعلام بنجاح!');
+                resolve();
+            })
+            .on('error', (err) => {
+                console.error('❌ خطأ في فك الضغط:', err);
+                reject(err);
+            });
+    });
 }
 const client = new Client({
     intents: [
@@ -304,5 +317,12 @@ client.on('messageCreate', message => {
     }
 });
 
-// تسجيل الدخول - ضع التوكن هنا
-client.login(process.env.TOKEN);
+(async () => {
+    try {
+        await extractFlags(); // ننتظر لحد ما يخلص فك الضغط
+        client.login(process.env.TOKEN); // بعدين نشغل البوت
+    } catch (error) {
+        console.error('فشل فك الضغط:', error);
+        process.exit(1);
+    }
+})();
