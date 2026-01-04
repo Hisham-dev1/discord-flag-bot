@@ -12,7 +12,7 @@
   "type": "commonjs",
   "dependencies": {
     "discord.js": "^14.24.2",
-    "sharp": "^0.34.5"
-    "unzipper": "^0.10.11"
+    "sharp": "^0.34.5",
+    "unzipper": "^0.12.3"
   }
 }
