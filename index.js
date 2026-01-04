@@ -1,5 +1,18 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
+const unzipper = require("unzipper");
+
+const zipPath = "./flag-cards.zip";
+const extractPath = "./flag-cards";
+
+if (!fs.existsSync(extractPath)) {
+  fs.createReadStream(zipPath)
+    .pipe(unzipper.Extract({ path: extractPath }))
+    .on("close", () => {
+      console.log("Images extracted successfully");
+    });
+}
+
 require('dotenv').config();
 
 const client = new Client({
@@ -300,3 +313,4 @@ client.on('messageCreate', message => {
 
 // تسجيل الدخول - ضع التوكن هنا
 client.login(process.env.TOKEN);
+
