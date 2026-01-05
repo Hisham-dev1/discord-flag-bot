@@ -319,7 +319,7 @@ client.on('messageCreate', message => {
             const country = countries[Math.floor(Math.random() * countries.length)];
             eventData.game = country;
 
-            //message.channel.send(`🎯 الجولة ${eventData.currentRound}/${eventData.rounds}`);
+            message.channel.send(`🎯 الجولة ${eventData.currentRound}/${eventData.rounds}`);
             message.channel.send({ files: [country.flag] });
 
             eventData.timeout = setTimeout(() => {
@@ -379,4 +379,5 @@ client.on('messageCreate', message => {
     await extractFlags();
     client.login(process.env.TOKEN);
 })();
+
 
