@@ -1,42 +1,31 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const http = require("http");
-const PORT = process.env.PORT || 3000;
 const unzipper = require("unzipper");
 
+const PORT = process.env.PORT || 3000;
+
+/* ================= KEEP ALIVE ================= */
 http.createServer((req, res) => {
     res.writeHead(200);
     res.end("Bot is running!");
-}).listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-});
+}).listen(PORT);
 
+/* ================= UNZIP FLAGS ================= */
 const zipPath = "./flag-cards.zip";
 const extractPath = "./flag-cards";
 
-// دالة فك الضغط مع Promise
 function extractFlags() {
     return new Promise((resolve, reject) => {
-        if (fs.existsSync(extractPath)) {
-            console.log('✅ مجلد الأعلام موجود مسبقاً');
-            resolve();
-            return;
-        }
-
-        console.log('🔄 جاري فك ضغط الأعلام...');
+        if (fs.existsSync(extractPath)) return resolve();
         fs.createReadStream(zipPath)
             .pipe(unzipper.Extract({ path: extractPath }))
-            .on('close', () => {
-                console.log('✅ تم فك ضغط الأعلام بنجاح!');
-                resolve();
-            })
-            .on('error', (err) => {
-                console.error('❌ خطأ في فك الضغط:', err);
-                reject(err);
-            });
+            .on('close', resolve)
+            .on('error', reject);
     });
 }
 
+/* ================= CLIENT ================= */
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -45,8 +34,10 @@ const client = new Client({
     ]
 });
 
+/* ================= COUNTRIES ================= */
 const countries = [
-    // الدول العربية
+
+    /* ================= الدول العربية ================= */
     { name: 'السعودية', flag: './flag-cards/sa.png', alternatives: ['saudi arabia', 'سعودية', 'المملكة'] },
     { name: 'الإمارات', flag: './flag-cards/ae.png', alternatives: ['uae', 'emirates', 'امارات'] },
     { name: 'مصر', flag: './flag-cards/eg.png', alternatives: ['egypt', 'مصر'] },
@@ -70,11 +61,11 @@ const countries = [
     { name: 'جيبوتي', flag: './flag-cards/dj.png', alternatives: ['djibouti', 'جيبوتي'] },
     { name: 'جزر القمر', flag: './flag-cards/km.png', alternatives: ['comoros', 'قمر'] },
 
-    // دول آسيا
+    /* ================= آسيا ================= */
     { name: 'الصين', flag: './flag-cards/cn.png', alternatives: ['china', 'صين'] },
     { name: 'اليابان', flag: './flag-cards/jp.png', alternatives: ['japan', 'يابان'] },
     { name: 'الهند', flag: './flag-cards/in.png', alternatives: ['india', 'هند'] },
-    { name: 'كوريا الجنوبية', flag: './flag-cards/kr.png', alternatives: ['south korea', 'كوريا', 'korea'] },
+    { name: 'كوريا الجنوبية', flag: './flag-cards/kr.png', alternatives: ['south korea', 'korea', 'كوريا'] },
     { name: 'كوريا الشمالية', flag: './flag-cards/kp.png', alternatives: ['north korea', 'كوريا الشمالية'] },
     { name: 'تايلاند', flag: './flag-cards/th.png', alternatives: ['thailand', 'تايلند'] },
     { name: 'فيتنام', flag: './flag-cards/vn.png', alternatives: ['vietnam', 'فيتنام'] },
@@ -108,12 +99,11 @@ const countries = [
     { name: 'هونغ كونغ', flag: './flag-cards/hk.png', alternatives: ['hong kong', 'هونغ كونغ'] },
     { name: 'ماكاو', flag: './flag-cards/mo.png', alternatives: ['macau', 'macao', 'ماكاو'] },
     { name: 'تايوان', flag: './flag-cards/tw.png', alternatives: ['taiwan', 'تايوان'] },
-    { name: 'إسرائيل', flag: './flag-cards/il.png', alternatives: ['israel', 'اسرائيل'] },
 
-    // دول أوروبا
+    /* ================= أوروبا ================= */
     { name: 'ألمانيا', flag: './flag-cards/de.png', alternatives: ['germany', 'المانيا'] },
     { name: 'فرنسا', flag: './flag-cards/fr.png', alternatives: ['france', 'فرنسا'] },
-    { name: 'بريطانيا', flag: './flag-cards/gb.png', alternatives: ['uk', 'england', 'britain', 'انجلترا'] },
+    { name: 'بريطانيا', flag: './flag-cards/gb.png', alternatives: ['uk', 'britain', 'england', 'انجلترا'] },
     { name: 'إيطاليا', flag: './flag-cards/it.png', alternatives: ['italy', 'ايطاليا'] },
     { name: 'إسبانيا', flag: './flag-cards/es.png', alternatives: ['spain', 'اسبانيا'] },
     { name: 'روسيا', flag: './flag-cards/ru.png', alternatives: ['russia', 'روسيا'] },
@@ -125,42 +115,11 @@ const countries = [
     { name: 'الدنمارك', flag: './flag-cards/dk.png', alternatives: ['denmark', 'دنمارك'] },
     { name: 'فنلندا', flag: './flag-cards/fi.png', alternatives: ['finland', 'فنلندا'] },
     { name: 'بولندا', flag: './flag-cards/pl.png', alternatives: ['poland', 'بولندا'] },
-    { name: 'اليونان', flag: './flag-cards/gr.png', alternatives: ['greece', 'يونان'] },
     { name: 'البرتغال', flag: './flag-cards/pt.png', alternatives: ['portugal', 'برتغال'] },
-    { name: 'النمسا', flag: './flag-cards/at.png', alternatives: ['austria', 'نمسا'] },
+    { name: 'اليونان', flag: './flag-cards/gr.png', alternatives: ['greece', 'يونان'] },
     { name: 'أوكرانيا', flag: './flag-cards/ua.png', alternatives: ['ukraine', 'اوكرانيا'] },
-    { name: 'أيرلندا', flag: './flag-cards/ie.png', alternatives: ['ireland', 'ايرلندا'] },
-    { name: 'التشيك', flag: './flag-cards/cz.png', alternatives: ['czech republic', 'czechia', 'تشيك'] },
-    { name: 'المجر', flag: './flag-cards/hu.png', alternatives: ['hungary', 'هنغاريا', 'مجر'] },
-    { name: 'رومانيا', flag: './flag-cards/ro.png', alternatives: ['romania', 'رومانيا'] },
-    { name: 'بلغاريا', flag: './flag-cards/bg.png', alternatives: ['bulgaria', 'بلغاريا'] },
-    { name: 'كرواتيا', flag: './flag-cards/hr.png', alternatives: ['croatia', 'كرواتيا'] },
-    { name: 'صربيا', flag: './flag-cards/rs.png', alternatives: ['serbia', 'صربيا'] },
-    { name: 'سلوفينيا', flag: './flag-cards/si.png', alternatives: ['slovenia', 'سلوفينيا'] },
-    { name: 'سلوفاكيا', flag: './flag-cards/sk.png', alternatives: ['slovakia', 'سلوفاكيا'] },
-    { name: 'البوسنة', flag: './flag-cards/ba.png', alternatives: ['bosnia', 'البوسنة', 'bosnia and herzegovina'] },
-    { name: 'ألبانيا', flag: './flag-cards/al.png', alternatives: ['albania', 'البانيا'] },
-    { name: 'مقدونيا', flag: './flag-cards/mk.png', alternatives: ['north macedonia', 'macedonia', 'مقدونيا'] },
-    { name: 'الجبل الأسود', flag: './flag-cards/me.png', alternatives: ['montenegro', 'الجبل الاسود'] },
-    { name: 'كوسوفو', flag: './flag-cards/xk.png', alternatives: ['kosovo', 'كوسوفو'] },
-    { name: 'لوكسمبورغ', flag: './flag-cards/lu.png', alternatives: ['luxembourg', 'لوكسمبورغ'] },
-    { name: 'مالطا', flag: './flag-cards/mt.png', alternatives: ['malta', 'مالطا'] },
-    { name: 'قبرص', flag: './flag-cards/cy.png', alternatives: ['cyprus', 'قبرص'] },
-    { name: 'إستونيا', flag: './flag-cards/ee.png', alternatives: ['estonia', 'استونيا'] },
-    { name: 'لاتفيا', flag: './flag-cards/lv.png', alternatives: ['latvia', 'لاتفيا'] },
-    { name: 'ليتوانيا', flag: './flag-cards/lt.png', alternatives: ['lithuania', 'ليتوانيا'] },
-    { name: 'مولدوفا', flag: './flag-cards/md.png', alternatives: ['moldova', 'مولدوفا'] },
-    { name: 'بيلاروسيا', flag: './flag-cards/by.png', alternatives: ['belarus', 'بيلاروسيا'] },
-    { name: 'موناكو', flag: './flag-cards/mc.png', alternatives: ['monaco', 'موناكو'] },
-    { name: 'ليختنشتاين', flag: './flag-cards/li.png', alternatives: ['liechtenstein', 'ليختنشتاين'] },
-    { name: 'أندورا', flag: './flag-cards/ad.png', alternatives: ['andorra', 'اندورا'] },
-    { name: 'سان مارينو', flag: './flag-cards/sm.png', alternatives: ['san marino', 'سان مارينو'] },
-    { name: 'الفاتيكان', flag: './flag-cards/va.png', alternatives: ['vatican', 'الفاتيكان'] },
-    { name: 'أيسلندا', flag: './flag-cards/is.png', alternatives: ['iceland', 'ايسلندا'] },
-    { name: 'جزر فارو', flag: './flag-cards/fo.png', alternatives: ['faroe islands', 'فارو'] },
-    { name: 'جزر آلاند', flag: './flag-cards/ax.png', alternatives: ['aland islands', 'الاند'] },
 
-    // الأمريكتان
+    /* ================= الأمريكتان ================= */
     { name: 'أمريكا', flag: './flag-cards/us.png', alternatives: ['usa', 'america', 'امريكا', 'الولايات المتحدة'] },
     { name: 'كندا', flag: './flag-cards/ca.png', alternatives: ['canada', 'كندا'] },
     { name: 'المكسيك', flag: './flag-cards/mx.png', alternatives: ['mexico', 'مكسيك'] },
@@ -168,224 +127,255 @@ const countries = [
     { name: 'الأرجنتين', flag: './flag-cards/ar.png', alternatives: ['argentina', 'ارجنتين'] },
     { name: 'تشيلي', flag: './flag-cards/cl.png', alternatives: ['chile', 'تشيلي'] },
     { name: 'كولومبيا', flag: './flag-cards/co.png', alternatives: ['colombia', 'كولومبيا'] },
-    { name: 'بيرو', flag: './flag-cards/pe.png', alternatives: ['peru', 'بيرو'] },
-    { name: 'فنزويلا', flag: './flag-cards/ve.png', alternatives: ['venezuela', 'فنزويلا'] },
-    { name: 'الإكوادور', flag: './flag-cards/ec.png', alternatives: ['ecuador', 'اكوادور'] },
-    { name: 'بوليفيا', flag: './flag-cards/bo.png', alternatives: ['bolivia', 'بوليفيا'] },
-    { name: 'باراغواي', flag: './flag-cards/py.png', alternatives: ['paraguay', 'باراغواي'] },
-    { name: 'أوروغواي', flag: './flag-cards/uy.png', alternatives: ['uruguay', 'اوروغواي'] },
-    { name: 'غيانا', flag: './flag-cards/gy.png', alternatives: ['guyana', 'غيانا'] },
-    { name: 'سورينام', flag: './flag-cards/sr.png', alternatives: ['suriname', 'سورينام'] },
-    { name: 'كوبا', flag: './flag-cards/cu.png', alternatives: ['cuba', 'كوبا'] },
-    { name: 'جامايكا', flag: './flag-cards/jm.png', alternatives: ['jamaica', 'جامايكا'] },
-    { name: 'هايتي', flag: './flag-cards/ht.png', alternatives: ['haiti', 'هايتي'] },
-    { name: 'الدومينيكان', flag: './flag-cards/do.png', alternatives: ['dominican republic', 'الدومينيكان'] },
-    { name: 'غواتيمالا', flag: './flag-cards/gt.png', alternatives: ['guatemala', 'غواتيمالا'] },
-    { name: 'هندوراس', flag: './flag-cards/hn.png', alternatives: ['honduras', 'هندوراس'] },
-    { name: 'السلفادور', flag: './flag-cards/sv.png', alternatives: ['el salvador', 'السلفادور'] },
-    { name: 'نيكاراغوا', flag: './flag-cards/ni.png', alternatives: ['nicaragua', 'نيكاراغوا'] },
-    { name: 'كوستاريكا', flag: './flag-cards/cr.png', alternatives: ['costa rica', 'كوستاريكا'] },
-    { name: 'بنما', flag: './flag-cards/pa.png', alternatives: ['panama', 'بنما'] },
-    { name: 'بليز', flag: './flag-cards/bz.png', alternatives: ['belize', 'بليز'] },
-    { name: 'باهاماس', flag: './flag-cards/bs.png', alternatives: ['bahamas', 'باهاماس'] },
-    { name: 'باربادوس', flag: './flag-cards/bb.png', alternatives: ['barbados', 'باربادوس'] },
-    { name: 'ترينيداد', flag: './flag-cards/tt.png', alternatives: ['trinidad and tobago', 'ترينيداد'] },
 
-    // أفريقيا
+    /* ================= أفريقيا ================= */
     { name: 'جنوب أفريقيا', flag: './flag-cards/za.png', alternatives: ['south africa', 'جنوب افريقيا'] },
     { name: 'نيجيريا', flag: './flag-cards/ng.png', alternatives: ['nigeria', 'نيجيريا'] },
     { name: 'كينيا', flag: './flag-cards/ke.png', alternatives: ['kenya', 'كينيا'] },
-    { name: 'إثيوبيا', flag: './flag-cards/et.png', alternatives: ['ethiopia', 'اثيوبيا'] },
     { name: 'غانا', flag: './flag-cards/gh.png', alternatives: ['ghana', 'غانا'] },
-    { name: 'تنزانيا', flag: './flag-cards/tz.png', alternatives: ['tanzania', 'تنزانيا'] },
-    { name: 'أنغولا', flag: './flag-cards/ao.png', alternatives: ['angola', 'انغولا'] },
-    { name: 'موزمبيق', flag: './flag-cards/mz.png', alternatives: ['mozambique', 'موزمبيق'] },
-    { name: 'زيمبابوي', flag: './flag-cards/zw.png', alternatives: ['zimbabwe', 'زيمبابوي'] },
-    { name: 'بوتسوانا', flag: './flag-cards/bw.png', alternatives: ['botswana', 'بوتسوانا'] },
-    { name: 'ناميبيا', flag: './flag-cards/na.png', alternatives: ['namibia', 'ناميبيا'] },
-    { name: 'زامبيا', flag: './flag-cards/zm.png', alternatives: ['zambia', 'زامبيا'] },
-    { name: 'مالاوي', flag: './flag-cards/mw.png', alternatives: ['malawi', 'مالاوي'] },
-    { name: 'مدغشقر', flag: './flag-cards/mg.png', alternatives: ['madagascar', 'مدغشقر'] },
-    { name: 'أوغندا', flag: './flag-cards/ug.png', alternatives: ['uganda', 'اوغندا'] },
-    { name: 'رواندا', flag: './flag-cards/rw.png', alternatives: ['rwanda', 'رواندا'] },
-    { name: 'بوروندي', flag: './flag-cards/bi.png', alternatives: ['burundi', 'بوروندي'] },
-    { name: 'الكاميرون', flag: './flag-cards/cm.png', alternatives: ['cameroon', 'الكاميرون'] },
-    { name: 'تشاد', flag: './flag-cards/td.png', alternatives: ['chad', 'تشاد'] },
-    { name: 'النيجر', flag: './flag-cards/ne.png', alternatives: ['niger', 'النيجر'] },
-    { name: 'مالي', flag: './flag-cards/ml.png', alternatives: ['mali', 'مالي'] },
-    { name: 'بوركينا فاسو', flag: './flag-cards/bf.png', alternatives: ['burkina faso', 'بوركينا فاسو'] },
-    { name: 'السنغال', flag: './flag-cards/sn.png', alternatives: ['senegal', 'السنغال'] },
-    { name: 'غامبيا', flag: './flag-cards/gm.png', alternatives: ['gambia', 'غامبيا'] },
-    { name: 'غينيا', flag: './flag-cards/gn.png', alternatives: ['guinea', 'غينيا'] },
-    { name: 'ساحل العاج', flag: './flag-cards/ci.png', alternatives: ['ivory coast', 'cote divoire', 'ساحل العاج'] },
-    { name: 'ليبيريا', flag: './flag-cards/lr.png', alternatives: ['liberia', 'ليبيريا'] },
-    { name: 'سيراليون', flag: './flag-cards/sl.png', alternatives: ['sierra leone', 'سيراليون'] },
-    { name: 'توغو', flag: './flag-cards/tg.png', alternatives: ['togo', 'توغو'] },
-    { name: 'بنين', flag: './flag-cards/bj.png', alternatives: ['benin', 'بنين'] },
-    { name: 'الغابون', flag: './flag-cards/ga.png', alternatives: ['gabon', 'الغابون'] },
-    { name: 'الكونغو', flag: './flag-cards/cg.png', alternatives: ['congo', 'الكونغو'] },
-    { name: 'جنوب السودان', flag: './flag-cards/ss.png', alternatives: ['south sudan', 'جنوب السودان'] },
-    { name: 'إريتريا', flag: './flag-cards/er.png', alternatives: ['eritrea', 'اريتريا'] },
+    { name: 'إثيوبيا', flag: './flag-cards/et.png', alternatives: ['ethiopia', 'اثيوبيا'] },
 
-    // أوقيانوسيا
+    /* ================= أوقيانوسيا ================= */
     { name: 'أستراليا', flag: './flag-cards/au.png', alternatives: ['australia', 'استراليا'] },
     { name: 'نيوزيلندا', flag: './flag-cards/nz.png', alternatives: ['new zealand', 'نيوزيلندا'] },
-    { name: 'بولينيزيا الفرنسية', flag: './flag-cards/pf.png', alternatives: ['french polynesia', 'بولينيزيا', 'تاهيتي'] },
-    { name: 'فيجي', flag: './flag-cards/fj.png', alternatives: ['fiji', 'فيجي'] }
+    { name: 'فيجي', flag: './flag-cards/fj.png', alternatives: ['fiji', 'فيجي'] },
+    // أقاليم وجزر إضافية (أوروبا)
+    { name: 'جيرزي', flag: './flag-cards/je.png', alternatives: ['jersey', 'جيرزي'] },
+    { name: 'غيرنزي', flag: './flag-cards/gg.png', alternatives: ['guernsey', 'غيرنزي'] },
+    { name: 'جزيرة مان', flag: './flag-cards/im.png', alternatives: ['isle of man', 'مان'] },
+
+    // أقاليم الكاريبي
+    { name: 'أروبا', flag: './flag-cards/aw.png', alternatives: ['aruba', 'اروبا'] },
+    { name: 'كوراساو', flag: './flag-cards/cw.png', alternatives: ['curaçao', 'curacao', 'كوراساو'] },
+    { name: 'سانت مارتن', flag: './flag-cards/sx.png', alternatives: ['sint maarten', 'سانت مارتن'] },
+    { name: 'بونير', flag: './flag-cards/bq.png', alternatives: ['bonaire', 'بونير'] },
+    { name: 'سانت لوسيا', flag: './flag-cards/lc.png', alternatives: ['saint lucia', 'سانت لوسيا'] },
+    { name: 'سانت فنسنت', flag: './flag-cards/vc.png', alternatives: ['saint vincent', 'سانت فنسنت'] },
+    { name: 'غرينادا', flag: './flag-cards/gd.png', alternatives: ['grenada', 'غرينادا'] },
+    { name: 'سانت كيتس', flag: './flag-cards/kn.png', alternatives: ['saint kitts', 'سانت كيتس'] },
+    { name: 'مونتسرات', flag: './flag-cards/ms.png', alternatives: ['montserrat', 'مونتسرات'] },
+    { name: 'أنغويلا', flag: './flag-cards/ai.png', alternatives: ['anguilla', 'أنغويلا'] },
+    { name: 'جزر كايمان', flag: './flag-cards/ky.png', alternatives: ['cayman islands', 'كايمان'] },
+    { name: 'جزر توركس وكايكوس', flag: './flag-cards/tc.png', alternatives: ['turks and caicos', 'توركس'] },
+
+    // أقاليم أمريكا
+    { name: 'غرينلاند', flag: './flag-cards/gl.png', alternatives: ['greenland', 'غرينلاند'] },
+    { name: 'برمودا', flag: './flag-cards/bm.png', alternatives: ['bermuda', 'برمودا'] },
+    { name: 'سانت بيير', flag: './flag-cards/pm.png', alternatives: ['saint pierre', 'سان بيير'] },
+
+    // أقاليم آسيا
+    { name: 'غوام', flag: './flag-cards/gu.png', alternatives: ['guam', 'غوام'] },
+    { name: 'جزر ماريانا الشمالية', flag: './flag-cards/mp.png', alternatives: ['northern mariana islands', 'ماريانا'] },
+    { name: 'بالاو', flag: './flag-cards/pw.png', alternatives: ['palau', 'بالاو'] },
+    { name: 'ميكرونيزيا', flag: './flag-cards/fm.png', alternatives: ['micronesia', 'ميكرونيزيا'] },
+    { name: 'جزر مارشال', flag: './flag-cards/mh.png', alternatives: ['marshall islands', 'مارشال'] },
+    { name: 'ساموا الأمريكية', flag: './flag-cards/as.png', alternatives: ['american samoa', 'ساموا الامريكية'] },
+
+    // أقاليم أفريقيا
+    { name: 'مايوت', flag: './flag-cards/yt.png', alternatives: ['mayotte', 'مايوت'] },
+    { name: 'ريونيون', flag: './flag-cards/re.png', alternatives: ['reunion', 'ريونيون'] },
+    { name: 'سانت هيلينا', flag: './flag-cards/sh.png', alternatives: ['saint helena', 'سانت هيلينا'] },
+
+    // أقاليم أوقيانوسيا
+    { name: 'كاليدونيا الجديدة', flag: './flag-cards/nc.png', alternatives: ['new caledonia', 'كاليدونيا'] },
+    { name: 'ساموا', flag: './flag-cards/ws.png', alternatives: ['samoa', 'ساموا'] },
+    { name: 'تونغا', flag: './flag-cards/to.png', alternatives: ['tonga', 'تونغا'] },
+    { name: 'كيريباس', flag: './flag-cards/ki.png', alternatives: ['kiribati', 'كيريباس'] },
+    { name: 'ناورو', flag: './flag-cards/nr.png', alternatives: ['nauru', 'ناورو'] },
+    { name: 'توفالو', flag: './flag-cards/tv.png', alternatives: ['tuvalu', 'توفالو'] },
+    // أقاليم فرنسا
+    { name: 'غوادلوب', flag: './flag-cards/gp.png', alternatives: ['guadeloupe', 'غوادلوب'] },
+    { name: 'مارتينيك', flag: './flag-cards/mq.png', alternatives: ['martinique', 'مارتينيك'] },
+    { name: 'غيانا الفرنسية', flag: './flag-cards/gf.png', alternatives: ['french guiana', 'غيانا الفرنسية'] },
+    { name: 'سانت مارتن الفرنسية', flag: './flag-cards/mf.png', alternatives: ['saint martin', 'سانت مارتن الفرنسية'] },
+    { name: 'سان بارتليمي', flag: './flag-cards/bl.png', alternatives: ['saint barthelemy', 'سان بارتليمي'] },
+    { name: 'واليس وفوتونا', flag: './flag-cards/wf.png', alternatives: ['wallis and futuna', 'واليس'] },
+
+    // أقاليم بريطانيا
+    { name: 'جزر بيتكيرن', flag: './flag-cards/pn.png', alternatives: ['pitcairn islands', 'بيتكيرن'] },
+    { name: 'جزر فوكلاند', flag: './flag-cards/fk.png', alternatives: ['falkland islands', 'فوكلاند'] },
+    { name: 'جورجيا الجنوبية', flag: './flag-cards/gs.png', alternatives: ['south georgia', 'جورجيا الجنوبية'] },
+    { name: 'الإقليم البريطاني بالمحيط الهندي', flag: './flag-cards/io.png', alternatives: ['british indian ocean territory', 'بيوت'] },
+    { name: 'جزر العذراء البريطانية', flag: './flag-cards/vg.png', alternatives: ['british virgin islands', 'فيرجن البريطانية'] },
+
+    // أقاليم أمريكا
+    { name: 'بورتوريكو', flag: './flag-cards/pr.png', alternatives: ['puerto rico', 'بورتو ريكو'] },
+    { name: 'جزر العذراء الأمريكية', flag: './flag-cards/vi.png', alternatives: ['us virgin islands', 'فيرجن الامريكية'] },
+
+    // أقاليم هولندا
+    //{ name: 'سابا', flag: './flag-cards/sx.png', alternatives: ['saba', 'سابا'] },
+    //{ name: 'سانت أوستاتيوس', flag: './flag-cards/bq.png', alternatives: ['sint eustatius', 'اوستاتيوس'] },
+
+    // أقاليم خاصة
+    { name: 'انتاركتيكا', flag: './flag-cards/aq.png', alternatives: ['antarctica', 'القطب الجنوبي'] },
+    { name: 'جزيرة بوفيه', flag: './flag-cards/bv.png', alternatives: ['bouvet island', 'بوفيه'] },
+    { name: 'جزر هيرد وماكدونالد', flag: './flag-cards/hm.png', alternatives: ['heard island', 'ماكدونالد'] },
+
+    // دول إضافية نادرة
+    { name: 'إسواتيني', flag: './flag-cards/sz.png', alternatives: ['eswatini', 'سوازيلاند'] },
+    { name: 'الراس الاخضر', flag: './flag-cards/cv.png', alternatives: ['cape verde', 'كاب فيردي'] },
+    { name: 'ساو تومي وبرينسيب', flag: './flag-cards/st.png', alternatives: ['sao tome', 'ساو تومي'] },
+    { name: 'غينيا بيساو', flag: './flag-cards/gw.png', alternatives: ['guinea bissau', 'غينيا بيساو'] },
+
+    // آسيا الوسطى والمحيط الهادئ
+    { name: 'فانواتو', flag: './flag-cards/vu.png', alternatives: ['vanuatu', 'فانواتو'] },
+    { name: 'جزر سليمان', flag: './flag-cards/sb.png', alternatives: ['solomon islands', 'سليمان'] },
+    { name: 'بابوا غينيا الجديدة', flag: './flag-cards/pg.png', alternatives: ['papua new guinea', 'بابوا'] },
+
 ];
 
+/* ================= STORAGE ================= */
 const activeGames = new Map();
 const activeEvents = new Map();
 
+/* ================= READY ================= */
 client.once('ready', () => {
-    console.log(`✅ البوت شغال! تم تسجيل الدخول كـ ${client.user.tag}`);
-    console.log(`🎮 عدد الأعلام المتاحة: ${countries.length} علم`);
+    console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
-// --- التعامل مع الرسائل ---
+/* ================= MESSAGE ================= */
 client.on('messageCreate', message => {
     if (message.author.bot) return;
     const args = message.content.split(" ");
 
-    // --- لعبة علم واحدة ---
-    if (message.content === '-اعلام' || message.content === '!flag') {
-        if (activeGames.has(message.channel.id)) {
-            message.reply('⚠️ في لعبة شغالة حالياً! جاوب على السؤال الحالي أول.');
-            return;
-        }
+    /* ========= SINGLE GAME ========= */
+    if (message.content === '-اعلام') {
+        if (activeGames.has(message.channel.id)) return message.reply('⚠️ في لعبة شغالة');
 
-        const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-        activeGames.set(message.channel.id, { country: randomCountry, startTime: Date.now() });
-        message.channel.send({ files: [randomCountry.flag] });
+        const country = countries[Math.floor(Math.random() * countries.length)];
+        activeGames.set(message.channel.id, country);
+
+        message.channel.send({ files: [country.flag] });
 
         const timeout = setTimeout(() => {
-            if (activeGames.has(message.channel.id)) {
-                const game = activeGames.get(message.channel.id);
-                message.channel.send(`⏰ **انتهى الوقت!**\n❌ لم يجب أحد بشكل صحيح\n✅ الإجابة الصحيحة: **${game.country.name}**`);
-                activeGames.delete(message.channel.id);
-            }
+            message.channel.send(`⏰ انتهى الوقت\n✅ الإجابة: **${country.name}**`);
+            activeGames.delete(message.channel.id);
         }, 15000);
 
-        activeGames.get(message.channel.id).timeout = timeout;
+        country.timeout = timeout;
         return;
     }
 
-    // --- التحقق من الإجابة في لعبة فردية ---
     if (activeGames.has(message.channel.id)) {
         const game = activeGames.get(message.channel.id);
-        const userAnswer = message.content.toLowerCase().trim();
-        const correctAnswers = [
-            game.country.name.toLowerCase(),
-            ...game.country.alternatives.map(alt => alt.toLowerCase())
-        ];
+        const answer = message.content.toLowerCase().trim();
+        const valid = [game.name.toLowerCase(), ...game.alternatives.map(a => a.toLowerCase())];
 
-        if (correctAnswers.includes(userAnswer)) {
-            if (game.timeout) clearTimeout(game.timeout);
-            message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
+        if (valid.includes(answer)) {
+            clearTimeout(game.timeout);
+            message.reply('✅ صح عليك!');
             activeGames.delete(message.channel.id);
         }
         return;
     }
 
-    // --- بدء إيفنت أعلام ---
-    if ((args[0] === '-ايفنت' || args[0] === '!event') && args[1] === 'اعلام') {
-        if (activeEvents.has(message.channel.id)) {
-            message.reply('⚠️ في إيفنت شغال حالياً! استخدم -الغاء ايفنت لإيقافه.');
-            return;
-        }
+    /* ========= EVENT START ========= */
+    if (args[0] === '-ايفنت' && args[1] === 'اعلام') {
+        if (activeEvents.has(message.channel.id))
+            return message.reply('⚠️ فيه إيفنت شغال');
 
         const rounds = parseInt(args[2]) || 5;
-        const leaderboard = new Map();
-        let currentRound = 0;
 
-        message.channel.send(`🎉 بدأ إيفنت الأعلام! عدد الجولات: **${rounds}**`);
+        const eventData = {
+            rounds,
+            currentRound: 0,
+            leaderboard: new Map(),
+            game: null,
+            timeout: null,
+            ended: false
+        };
+
+        activeEvents.set(message.channel.id, eventData);
+
+        message.channel.send(`🎉 **بدأ إيفنت الأعلام**\n🕹️ عدد الجولات: **${rounds}**`);
 
         const playRound = () => {
-            if (currentRound >= rounds) {
-                let results = '';
-                if (leaderboard.size === 0) results = 'لم يجب أحد بشكل صحيح 😅';
-                else leaderboard.forEach((score, user) => { results += `**${user}**: ${score} إجابة صحيحة\n`; });
+            if (eventData.ended) return;
 
-                message.channel.send(`🏁 انتهى الإيفنت!\n\n**ملخص النتائج:**\n${results}`);
+            if (eventData.currentRound >= eventData.rounds) {
+                const sorted = [...eventData.leaderboard.entries()]
+                    .sort((a, b) => b[1] - a[1]);
+
+                const embed = new EmbedBuilder()
+                    .setTitle('🏁 انتهى الإيفنت')
+                    .setColor('#2ecc71')
+                    .setDescription(
+                        sorted.length
+                            ? sorted.map((e, i) => {
+                                const medals = ['🥇', '🥈', '🥉'];
+                                return `${medals[i] || '🎯'} **${e[0]}** — ${e[1]} نقطة`;
+                            }).join('\n')
+                            : '❌ ما فيه إجابات صحيحة'
+                    )
+                    .setFooter({ text: 'شكراً لمشاركتكم ❤️' });
+
+                message.channel.send({ embeds: [embed] });
                 activeEvents.delete(message.channel.id);
                 return;
             }
 
-            const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-            const eventGame = { country: randomCountry, startTime: Date.now(), timeout: null };
+            eventData.currentRound++;
 
-            activeEvents.set(message.channel.id, { game: eventGame, leaderboard, currentRound, rounds, playRound });
+            const country = countries[Math.floor(Math.random() * countries.length)];
+            eventData.game = country;
 
-            message.channel.send({ files: [randomCountry.flag] });
+            message.channel.send(`🎯 الجولة ${eventData.currentRound}/${eventData.rounds}`);
+            message.channel.send({ files: [country.flag] });
 
-            eventGame.timeout = setTimeout(() => {
-                message.channel.send(`⏰ **انتهى الوقت للجولة ${currentRound + 1}!**\n❌ الإجابة الصحيحة: **${randomCountry.name}**`);
-                currentRound++;
+            eventData.timeout = setTimeout(() => {
+                if (eventData.ended) return;
+                message.channel.send(`⏰ انتهى الوقت\n✅ الإجابة: **${country.name}**`);
+                eventData.game = null;
                 setTimeout(playRound, 3000);
             }, 15000);
         };
 
+        eventData.playRound = playRound;
         playRound();
         return;
     }
 
-    // --- التحقق من الإجابة في الإيفنت ---
+    /* ========= EVENT ANSWER ========= */
     if (activeEvents.has(message.channel.id)) {
-        const eventData = activeEvents.get(message.channel.id);
-        const game = eventData.game;
-        const leaderboard = eventData.leaderboard;
-        const userAnswer = message.content.toLowerCase().trim();
-        const correctAnswers = [game.country.name.toLowerCase(), ...game.country.alternatives.map(alt => alt.toLowerCase())];
+        const event = activeEvents.get(message.channel.id);
+        if (!event.game || event.ended) return;
 
-        if (correctAnswers.includes(userAnswer)) {
-            if (game.timeout) clearTimeout(game.timeout);
-            const prevScore = leaderboard.get(message.author.username) || 0;
-            leaderboard.set(message.author.username, prevScore + 1);
-            message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
-            eventData.currentRound++;
-            setTimeout(eventData.playRound, 3000);
+        const answer = message.content.toLowerCase().trim();
+        const valid = [
+            event.game.name.toLowerCase(),
+            ...event.game.alternatives.map(a => a.toLowerCase())
+        ];
+
+        if (valid.includes(answer)) {
+            clearTimeout(event.timeout);
+
+            const user = message.author.username;
+            event.leaderboard.set(user, (event.leaderboard.get(user) || 0) + 1);
+
+            message.reply('🔥 إجابة صحيحة!');
+            event.game = null;
+
+            setTimeout(event.playRound, 3000);
         }
         return;
     }
 
-    // --- إلغاء الإيفنت ---
-    if (message.content === '-الغاء ايفنت' || message.content === '!cancel event') {
-        if (activeEvents.has(message.channel.id)) {
-            const eventData = activeEvents.get(message.channel.id);
-            if (eventData.game.timeout) clearTimeout(eventData.game.timeout);
-            activeEvents.delete(message.channel.id);
-            message.reply('❌ تم إلغاء الإيفنت بنجاح!');
-        } else {
-            message.reply('⚠️ لا يوجد إيفنت نشط في هذه القناة.');
-        }
-        return;
-    }
+    /* ========= CANCEL ========= */
+    if (message.content === '-الغاء ايفنت') {
+        if (!activeEvents.has(message.channel.id))
+            return message.reply('❌ ما فيه إيفنت');
 
-    // --- أمر المساعدة ---
-    if (message.content === '!help' || message.content === '!مساعدة') {
-        const helpEmbed = new EmbedBuilder()
-            .setTitle('📖 قائمة الأوامر')
-            .setDescription('**أوامر بوت الأعلام:**')
-            .addFields(
-                { name: '-اعلام أو !flag', value: 'بدء لعبة علم واحد', inline: false },
-                { name: '-ايفنت اعلام أو !event flags [عدد الجولات]', value: 'بدء إيفنت متعدد الجولات', inline: false },
-                { name: '-الغاء ايفنت أو !cancel event', value: 'إلغاء الإيفنت النشط', inline: false },
-                { name: '!مساعدة أو !help', value: 'عرض هذه القائمة', inline: false }
-            )
-            .setColor('#3498db')
-            .setFooter({ text: `استمتع باللعب! 🎮 | ${countries.length} علم متاح` });
+        const event = activeEvents.get(message.channel.id);
+        event.ended = true;
+        if (event.timeout) clearTimeout(event.timeout);
+        activeEvents.delete(message.channel.id);
 
-        message.reply({ embeds: [helpEmbed] });
+        message.reply('🛑 تم إلغاء الإيفنت');
     }
 });
 
-// تسجيل الدخول
+/* ================= LOGIN ================= */
 (async () => {
-    try {
-        await extractFlags();
-        client.login(process.env.TOKEN);
-    } catch (error) {
-        console.error('فشل فك الضغط:', error);
-        process.exit(1);
-    }
+    await extractFlags();
+    client.login(process.env.TOKEN);
 })();
