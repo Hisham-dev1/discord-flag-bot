@@ -180,7 +180,7 @@ const countries = [
     { name: 'كاليدونيا الجديدة', flag: './flag-cards/nc.png', alternatives: ['new caledonia', 'كاليدونيا'] },
     { name: 'ساموا', flag: './flag-cards/ws.png', alternatives: ['samoa', 'ساموا'] },
     { name: 'تونغا', flag: './flag-cards/to.png', alternatives: ['tonga', 'تونغا'] },
-    { name: 'كيريباس', flag: './flag-cards/ki.png', alternatives: ['kiribati', 'كيريباس'] },
+    { name: 'كيريباتي', flag: './flag-cards/ki.png', alternatives: ['kiribati', 'كيريباتي'] },
     { name: 'ناورو', flag: './flag-cards/nr.png', alternatives: ['nauru', 'ناورو'] },
     { name: 'توفالو', flag: './flag-cards/tv.png', alternatives: ['tuvalu', 'توفالو'] },
     // أقاليم فرنسا
@@ -263,7 +263,7 @@ client.on('messageCreate', message => {
 
         if (valid.includes(answer)) {
             clearTimeout(game.timeout);
-            message.reply('✅ صح عليك!');
+            message.reply('😽😽 شطوووور');
             activeGames.delete(message.channel.id);
         }
         return;
@@ -319,7 +319,7 @@ client.on('messageCreate', message => {
             const country = countries[Math.floor(Math.random() * countries.length)];
             eventData.game = country;
 
-            message.channel.send(`🎯 الجولة ${eventData.currentRound}/${eventData.rounds}`);
+            //message.channel.send(`🎯 الجولة ${eventData.currentRound}/${eventData.rounds}`);
             message.channel.send({ files: [country.flag] });
 
             eventData.timeout = setTimeout(() => {
@@ -352,7 +352,7 @@ client.on('messageCreate', message => {
             const user = message.author.username;
             event.leaderboard.set(user, (event.leaderboard.get(user) || 0) + 1);
 
-            message.reply('🔥 إجابة صحيحة!');
+            message.reply('😽😽 شطوووور');
             event.game = null;
 
             setTimeout(event.playRound, 3000);
@@ -379,3 +379,4 @@ client.on('messageCreate', message => {
     await extractFlags();
     client.login(process.env.TOKEN);
 })();
+
