@@ -290,7 +290,7 @@ client.on('messageCreate', message => {
     // إيفنت الأعلام
     // =========================
     if (args[0] === '-ايفنت' && args[1] === 'اعلام') {
-        return startFlagEvent(message, args[2]);
+        return startEventRound(message, args[2]);
     }
 
     // =========================
@@ -503,3 +503,4 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
+
