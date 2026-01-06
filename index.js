@@ -381,7 +381,7 @@ client.on('messageCreate', message => {
     // ==================== أمر لعبة فردية (الأصلي) ====================
     if (args[0] === '-اعلام' && args.length === 1) {
         if (eventGames.has(message.channel.id))
-        if (activeEvents.has(message.channel.id)) return;
+        if (eventGames.has(message.channel.id)) return;
         {
             message.reply('⚠️ في إيفنت شغال حالياً! استخدم `-الغاء ايفنت` لإلغائه.');
             return;
@@ -494,5 +494,6 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
+
 
 
