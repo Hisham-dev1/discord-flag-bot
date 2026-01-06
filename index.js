@@ -285,6 +285,13 @@ function startEventRound(channel, eventData) {
 // ==================== الأوامر ====================
 client.on('messageCreate', message => {
     if (message.author.bot) return;
+    const args = message.content.trim().split(/\s+/);
+        if (args[0] === '-اعلام' && args.length === 1) {
+        if (activeEvents.has(message.channel.id)) return;
+        if (activeGames.has(message.channel.id)) return;
+
+        // كود لعبة الأعلام العادية
+    }
 
     // ==================== أمر إيفنت الأعلام (المضاف) ====================
     if (message.content === '-ايفنت اعلام' || message.content === '!event flags') {
@@ -487,4 +494,5 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
+
 
