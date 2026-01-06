@@ -286,12 +286,23 @@ function startEventRound(channel, eventData) {
 client.on('messageCreate', message => {
     if (message.author.bot) return;
     const args = message.content.trim().split(/\s+/);
-        if (args[0] === '-اعلام' && args.length === 1) {
-        if (activeGames.has(message.channel.id)) return;
-        if (eventGames.has(message.channel.id)) return;
-
-        // كود لعبة الأعلام العادية
+    // =========================
+    // إيفنت الأعلام
+    // =========================
+    if (args[0] === '-ايفنت' && args[1] === 'اعلام') {
+        return startFlagEvent(message, args[2]);
     }
+
+    // =========================
+    // لعبة الأعلام الفردية
+    // =========================
+    if (args[0] === '-اعلام' && args.length === 1) {
+        // لو فيه إيفنت شغال لا تسوي شي
+        if (activeEvents.has(message.channel.id)) return;
+
+        return sendSingleFlag(message);
+    }
+});
 
     // ==================== أمر إيفنت الأعلام (المضاف) ====================
     if (message.content === '-ايفنت اعلام' || message.content === '!event flags') {
@@ -493,6 +504,7 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
+
 
 
 
