@@ -1,31 +1,42 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const http = require("http");
+const PORT = process.env.PORT || 3000;
 const unzipper = require("unzipper");
 
-const PORT = process.env.PORT || 3000;
-
-/* ================= KEEP ALIVE ================= */
 http.createServer((req, res) => {
     res.writeHead(200);
     res.end("Bot is running!");
-}).listen(PORT);
+}).listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+});
 
-/* ================= UNZIP FLAGS ================= */
 const zipPath = "./flag-cards.zip";
 const extractPath = "./flag-cards";
 
+// دالة فك الضغط مع Promise
 function extractFlags() {
     return new Promise((resolve, reject) => {
-        if (fs.existsSync(extractPath)) return resolve();
+        if (fs.existsSync(extractPath)) {
+            console.log('✅ مجلد الأعلام موجود مسبقاً');
+            resolve();
+            return;
+        }
+
+        console.log('🔄 جاري فك ضغط الأعلام...');
         fs.createReadStream(zipPath)
             .pipe(unzipper.Extract({ path: extractPath }))
-            .on('close', resolve)
-            .on('error', reject);
+            .on('close', () => {
+                console.log('✅ تم فك ضغط الأعلام بنجاح!');
+                resolve();
+            })
+            .on('error', (err) => {
+                console.error('❌ خطأ في فك الضغط:', err);
+                reject(err);
+            });
     });
 }
 
-/* ================= CLIENT ================= */
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -34,8 +45,7 @@ const client = new Client({
     ]
 });
 
-/* ================= COUNTRIES ================= */
-const flags = [
+const countries = [
 
     /* ================= الدول العربية ================= */
     { name: 'السعودية', flag: './flag-cards/sa.png', alternatives: ['saudi arabia', 'سعودية', 'المملكة'] },
@@ -224,181 +234,158 @@ const flags = [
 
 ];
 
-// =======================
-// إدارة الإيفنت
-// =======================
+const activeGames = new Map();
 const activeEvents = new Map();
 
-// =======================
-// لعبة علم واحد
-// =======================
-async function sendSingleFlag(message) {
-    const flag = flags[Math.floor(Math.random() * flags.length)];
+client.once('ready', () => {
+    console.log(`✅ البوت شغال! تم تسجيل الدخول كـ ${client.user.tag}`);
+    console.log(`🎮 عدد الأعلام المتاحة: ${countries.length} علم`);
+});
 
-    const embed = new EmbedBuilder()
-        .setTitle('🇺🇳 ما اسم هذه الدولة؟')
-        .setImage('attachment://flag.png')
-        .setColor('Random');
+// --- التعامل مع الرسائل ---
+client.on('messageCreate', message => {
+    if (message.author.bot) return;
+    const args = message.content.split(" ");
 
-    await message.channel.send({
-        embeds: [embed],
-        files: [{ attachment: flag.flag, name: 'flag.png' }]
-    });
-
-    const filter = m => {
-        const answer = m.content.toLowerCase();
-        return [flag.name.toLowerCase(), ...flag.alternatives.map(a => a.toLowerCase())].includes(answer);
-    };
-
-    const collector = message.channel.createMessageCollector({ filter, time: 15000 });
-
-    collector.on('collect', m => {
-        m.reply(`✅ صح! الإجابة: **${flag.name}**`);
-        collector.stop();
-    });
-}
-
-// =======================
-// إيفنت الأعلام
-// =======================
-async function startFlagEvent(message, totalRounds) {
-    let currentRound = 0;
-    const scores = {};
-    const channelId = message.channel.id;
-
-    activeEvents.set(channelId, {
-        game: null,
-        ended: false
-    });
-
-    message.channel.send(`🎉 بدأ **إيفنت الأعلام** | عدد الجولات: **${totalRounds}**`);
-
-    const nextRound = async () => {
-        const event = activeEvents.get(channelId);
-        if (!event || event.ended) return;
-
-        if (currentRound >= totalRounds) {
-            endEvent();
+    // --- لعبة علم واحدة ---
+    if (message.content === '-اعلام' || message.content === '!flag') {
+        if (activeGames.has(message.channel.id)) {
+            message.reply('⚠️ في لعبة شغالة حالياً! جاوب على السؤال الحالي أول.');
             return;
         }
 
-        currentRound++;
+        const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+        activeGames.set(message.channel.id, { country: randomCountry, startTime: Date.now() });
+        message.channel.send({ files: [randomCountry.flag] });
 
-        const flag = flags[Math.floor(Math.random() * flags.length)];
-        event.game = flag;
-
-        const embed = new EmbedBuilder()
-            .setTitle(`🌍 الجولة ${currentRound} / ${totalRounds}`)
-            .setDescription('اكتب اسم الدولة')
-            .setImage('attachment://flag.png')
-            .setColor('Blue');
-
-        await message.channel.send({
-            embeds: [embed],
-            files: [{ attachment: flag.flag, name: 'flag.png' }]
-        });
-
-        event.roundTimeout = setTimeout(() => {
-            event.game = null;
-            message.channel.send(`⏰ انتهى الوقت! الإجابة: **${flag.name}**`);
-            setTimeout(nextRound, 3000);
+        const timeout = setTimeout(() => {
+            if (activeGames.has(message.channel.id)) {
+                const game = activeGames.get(message.channel.id);
+                message.channel.send(`⏰ **انتهى الوقت!**\n❌ لم يجب أحد بشكل صحيح\n✅ الإجابة الصحيحة: **${game.country.name}**`);
+                activeGames.delete(message.channel.id);
+            }
         }, 15000);
-    };
 
-    const endEvent = () => {
-        const event = activeEvents.get(channelId);
-        if (!event) return;
-
-        event.ended = true;
-        clearTimeout(event.roundTimeout);
-        activeEvents.delete(channelId);
-
-        const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-
-        let result = '🏁 **انتهى الإيفنت!**\n\n';
-        if (sorted.length === 0) {
-            result += '❌ ما أحد جاوب صح';
-        } else {
-            sorted.forEach(([user, score], i) => {
-                result += `${i + 1}. <@${user}> — **${score}** نقطة\n`;
-            });
-        }
-
-        message.channel.send(result);
-    };
-
-    nextRound();
-
-    // مستمع الإجابات
-    client.on('messageCreate', msg => {
-        if (msg.channel.id !== channelId || msg.author.bot) return;
-
-        const event = activeEvents.get(channelId);
-        if (!event || !event.game || event.ended) return;
-
-        const game = event.game;
-        const answer = msg.content.toLowerCase();
-
-        const valid = [
-            game.name.toLowerCase(),
-            ...game.alternatives.map(a => a.toLowerCase())
-        ];
-
-        if (!valid.includes(answer)) return;
-
-        // قفل الجولة
-        clearTimeout(event.roundTimeout);
-        event.game = null;
-
-        scores[msg.author.id] = (scores[msg.author.id] || 0) + 1;
-
-        msg.reply(`✅ صح! **${game.name}** (+1)`);
-
-        setTimeout(nextRound, 3000);
-    });
-}
-
-// =======================
-// استقبال الأوامر
-// =======================
-client.on('messageCreate', message => {
-    if (message.author.bot) return;
-
-    const args = message.content.split(' ');
-
-    // إلغاء الإيفنت
-    if (message.content === '-الغاء ايفنت') {
-        const event = activeEvents.get(message.channel.id);
-        if (!event) return message.reply('❌ ما فيه إيفنت شغال');
-
-        event.ended = true;
-        clearTimeout(event.roundTimeout);
-        activeEvents.delete(message.channel.id);
-
-        return message.channel.send('🛑 تم إلغاء الإيفنت');
+        activeGames.get(message.channel.id).timeout = timeout;
+        return;
     }
 
-    // إيفنت أعلام
-    if (args[0] === '-ايفنت' && args[1] === 'اعلام') {
+    // --- التحقق من الإجابة في لعبة فردية ---
+    if (activeGames.has(message.channel.id)) {
+        const game = activeGames.get(message.channel.id);
+        const userAnswer = message.content.toLowerCase().trim();
+        const correctAnswers = [
+            game.country.name.toLowerCase(),
+            ...game.country.alternatives.map(alt => alt.toLowerCase())
+        ];
+
+        if (correctAnswers.includes(userAnswer)) {
+            if (game.timeout) clearTimeout(game.timeout);
+            message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
+            activeGames.delete(message.channel.id);
+        }
+        return;
+    }
+
+    // --- بدء إيفنت أعلام ---
+    if ((args[0] === '-ايفنت' || args[0] === '!event') && args[1] === 'اعلام') {
         if (activeEvents.has(message.channel.id)) {
-            return message.reply('⚠️ فيه إيفنت شغال بالفعل');
+            message.reply('⚠️ في إيفنت شغال حالياً! استخدم -الغاء ايفنت لإيقافه.');
+            return;
         }
 
         const rounds = parseInt(args[2]) || 5;
-        return startFlagEvent(message, rounds);
+        const leaderboard = new Map();
+        let currentRound = 0;
+
+        message.channel.send(`🎉 بدأ إيفنت الأعلام! عدد الجولات: **${rounds}**`);
+
+        const playRound = () => {
+            if (currentRound >= rounds) {
+                let results = '';
+                if (leaderboard.size === 0) results = 'لم يجب أحد بشكل صحيح 😅';
+                else leaderboard.forEach((score, user) => { results += `**${user}**: ${score} إجابة صحيحة\n`; });
+
+                message.channel.send(`🏁 انتهى الإيفنت!\n\n**ملخص النتائج:**\n${results}`);
+                activeEvents.delete(message.channel.id);
+                return;
+            }
+
+            const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+            const eventGame = { country: randomCountry, startTime: Date.now(), timeout: null };
+
+            activeEvents.set(message.channel.id, { game: eventGame, leaderboard, currentRound, rounds, playRound });
+
+            message.channel.send({ files: [randomCountry.flag] });
+
+            eventGame.timeout = setTimeout(() => {
+                message.channel.send(`⏰ **انتهى الوقت للجولة ${currentRound + 1}!**\n❌ الإجابة الصحيحة: **${randomCountry.name}**`);
+                currentRound++;
+                setTimeout(playRound, 3000);
+            }, 15000);
+        };
+
+        playRound();
+        return;
     }
 
-    // لعبة علم واحد (تتوقف وقت الإيفنت)
-    if (message.content === '-اعلام') {
-        if (activeEvents.has(message.channel.id)) return;
-        return sendSingleFlag(message);
+    // --- التحقق من الإجابة في الإيفنت ---
+    if (activeEvents.has(message.channel.id)) {
+        const eventData = activeEvents.get(message.channel.id);
+        const game = eventData.game;
+        const leaderboard = eventData.leaderboard;
+        const userAnswer = message.content.toLowerCase().trim();
+        const correctAnswers = [game.country.name.toLowerCase(), ...game.country.alternatives.map(alt => alt.toLowerCase())];
+
+        if (correctAnswers.includes(userAnswer)) {
+            if (game.timeout) clearTimeout(game.timeout);
+            const prevScore = leaderboard.get(message.author.username) || 0;
+            leaderboard.set(message.author.username, prevScore + 1);
+            message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
+            eventData.currentRound++;
+            setTimeout(eventData.playRound, 3000);
+        }
+        return;
+    }
+
+    // --- إلغاء الإيفنت ---
+    if (message.content === '-الغاء ايفنت' || message.content === '!cancel event') {
+        if (activeEvents.has(message.channel.id)) {
+            const eventData = activeEvents.get(message.channel.id);
+            if (eventData.game.timeout) clearTimeout(eventData.game.timeout);
+            activeEvents.delete(message.channel.id);
+            message.reply('❌ تم إلغاء الإيفنت بنجاح!');
+        } else {
+            message.reply('⚠️ لا يوجد إيفنت نشط في هذه القناة.');
+        }
+        return;
+    }
+
+    // --- أمر المساعدة ---
+    if (message.content === '!help' || message.content === '!مساعدة') {
+        const helpEmbed = new EmbedBuilder()
+            .setTitle('📖 قائمة الأوامر')
+            .setDescription('**أوامر بوت الأعلام:**')
+            .addFields(
+                { name: '-اعلام أو !flag', value: 'بدء لعبة علم واحد', inline: false },
+                { name: '-ايفنت اعلام أو !event flags [عدد الجولات]', value: 'بدء إيفنت متعدد الجولات', inline: false },
+                { name: '-الغاء ايفنت أو !cancel event', value: 'إلغاء الإيفنت النشط', inline: false },
+                { name: '!مساعدة أو !help', value: 'عرض هذه القائمة', inline: false }
+            )
+            .setColor('#3498db')
+            .setFooter({ text: `استمتع باللعب! 🎮 | ${countries.length} علم متاح` });
+
+        message.reply({ embeds: [helpEmbed] });
     }
 });
 
-/* ================= LOGIN ================= */
+// تسجيل الدخول
 (async () => {
-    await extractFlags();
-    client.login(process.env.TOKEN);
+    try {
+        await extractFlags();
+        client.login(process.env.TOKEN);
+    } catch (error) {
+        console.error('فشل فك الضغط:', error);
+        process.exit(1);
+    }
 })();
-
-
