@@ -302,7 +302,6 @@ client.on('messageCreate', message => {
 
         return sendSingleFlag(message);
     }
-});
 
     // ==================== أمر إيفنت الأعلام (المضاف) ====================
     if (message.content === '-ايفنت اعلام' || message.content === '!event flags') {
@@ -504,9 +503,3 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
-
-
-
-
-
-
