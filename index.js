@@ -50,13 +50,13 @@ const countries = [
 
     /* ================= الدول العربية ================= */
     { name: 'السعودية', flag: './flag-cards/sa.png', alternatives: ['saudi arabia', 'سعودية', 'المملكة'] },
-    { name: 'الإمارات', flag: './flag-cards/ae.png', alternatives: ['uae', 'emirates', 'امارات'] },
+    { name: 'الامارات', flag: './flag-cards/ae.png', alternatives: ['uae', 'emirates', 'امارات'] },
     { name: 'مصر', flag: './flag-cards/eg.png', alternatives: ['egypt', 'مصر'] },
     { name: 'الكويت', flag: './flag-cards/kw.png', alternatives: ['kuwait', 'كويت'] },
     { name: 'قطر', flag: './flag-cards/qa.png', alternatives: ['qatar', 'قطر'] },
     { name: 'البحرين', flag: './flag-cards/bh.png', alternatives: ['bahrain', 'بحرين'] },
     { name: 'عمان', flag: './flag-cards/om.png', alternatives: ['oman', 'عمان'] },
-    { name: 'الأردن', flag: './flag-cards/jo.png', alternatives: ['jordan', 'اردن'] },
+    { name: 'الاردن', flag: './flag-cards/jo.png', alternatives: ['jordan', 'اردن'] },
     { name: 'العراق', flag: './flag-cards/iq.png', alternatives: ['iraq', 'عراق'] },
     { name: 'سوريا', flag: './flag-cards/sy.png', alternatives: ['syria', 'سوريا'] },
     { name: 'لبنان', flag: './flag-cards/lb.png', alternatives: ['lebanon', 'لبنان'] },
@@ -160,16 +160,16 @@ const countries = [
     { name: 'سانت مارتن', flag: './flag-cards/sx.png', alternatives: ['sint maarten', 'سانت مارتن'] },
     { name: 'بونير', flag: './flag-cards/bq.png', alternatives: ['bonaire', 'بونير'] },
     { name: 'سانت لوسيا', flag: './flag-cards/lc.png', alternatives: ['saint lucia', 'سانت لوسيا'] },
-    { name: 'سانت فنسنت', flag: './flag-cards/vc.png', alternatives: ['saint vincent', 'سانت فنسنت'] },
+    { name: 'سانت فنسنت والغرينادين', flag: './flag-cards/vc.png', alternatives: ['saint vincent', 'سانت فنسنت'] },
     { name: 'غرينادا', flag: './flag-cards/gd.png', alternatives: ['grenada', 'غرينادا'] },
-    { name: 'سانت كيتس', flag: './flag-cards/kn.png', alternatives: ['saint kitts', 'سانت كيتس'] },
+    { name: 'سانت كيتس ونيفيس', flag: './flag-cards/kn.png', alternatives: ['saint kitts', 'سانت كيتس'] },
     { name: 'مونتسرات', flag: './flag-cards/ms.png', alternatives: ['montserrat', 'مونتسرات'] },
-    { name: 'أنغويلا', flag: './flag-cards/ai.png', alternatives: ['anguilla', 'أنغويلا'] },
+    { name: 'انغويلا', flag: './flag-cards/ai.png', alternatives: ['anguilla', 'أنغويلا'] },
     { name: 'جزر كايمان', flag: './flag-cards/ky.png', alternatives: ['cayman islands', 'كايمان'] },
     { name: 'جزر توركس وكايكوس', flag: './flag-cards/tc.png', alternatives: ['turks and caicos', 'توركس'] },
     { name: 'غرينلاند', flag: './flag-cards/gl.png', alternatives: ['greenland', 'غرينلاند'] },
     { name: 'برمودا', flag: './flag-cards/bm.png', alternatives: ['bermuda', 'برمودا'] },
-    { name: 'سانت بيير', flag: './flag-cards/pm.png', alternatives: ['saint pierre', 'سان بيير'] },
+    { name: 'سانت بيير وميكلون', flag: './flag-cards/pm.png', alternatives: ['saint pierre', 'سان بيير'] },
     { name: 'غوام', flag: './flag-cards/gu.png', alternatives: ['guam', 'غوام'] },
     { name: 'جزر ماريانا الشمالية', flag: './flag-cards/mp.png', alternatives: ['northern mariana islands', 'ماريانا'] },
     { name: 'بالاو', flag: './flag-cards/pw.png', alternatives: ['palau', 'بالاو'] },
@@ -187,7 +187,7 @@ const countries = [
     { name: 'توفالو', flag: './flag-cards/tv.png', alternatives: ['tuvalu', 'توفالو'] },
     { name: 'غوادلوب', flag: './flag-cards/gp.png', alternatives: ['guadeloupe', 'غوادلوب'] },
     { name: 'مارتينيك', flag: './flag-cards/mq.png', alternatives: ['martinique', 'مارتينيك'] },
-    { name: 'غيانا الفرنسية', flag: './flag-cards/gf.png', alternatives: ['french guiana', 'غيانا الفرنسية'] },
+    { name: 'غويانا الفرنسية', flag: './flag-cards/gf.png', alternatives: ['french guiana', 'غيانا الفرنسية'] },
     { name: 'سانت مارتن الفرنسية', flag: './flag-cards/mf.png', alternatives: ['saint martin', 'سانت مارتن الفرنسية'] },
     { name: 'سان بارتليمي', flag: './flag-cards/bl.png', alternatives: ['saint barthelemy', 'سان بارتليمي'] },
     { name: 'واليس وفوتونا', flag: './flag-cards/wf.png', alternatives: ['wallis and futuna', 'واليس'] },
@@ -201,7 +201,7 @@ const countries = [
     { name: 'انتاركتيكا', flag: './flag-cards/aq.png', alternatives: ['antarctica', 'القطب الجنوبي'] },
     { name: 'جزيرة بوفيه', flag: './flag-cards/bv.png', alternatives: ['bouvet island', 'بوفيه'] },
     { name: 'جزر هيرد وماكدونالد', flag: './flag-cards/hm.png', alternatives: ['heard island', 'ماكدونالد'] },
-    { name: 'إسواتيني', flag: './flag-cards/sz.png', alternatives: ['eswatini', 'سوازيلاند'] },
+    { name: 'مملكة اسواتيني', flag: './flag-cards/sz.png', alternatives: ['eswatini', 'سوازيلاند'] },
     { name: 'الراس الاخضر', flag: './flag-cards/cv.png', alternatives: ['cape verde', 'كاب فيردي'] },
     { name: 'ساو تومي وبرينسيب', flag: './flag-cards/st.png', alternatives: ['sao tome', 'ساو تومي'] },
     { name: 'غينيا بيساو', flag: './flag-cards/gw.png', alternatives: ['guinea bissau', 'غينيا بيساو'] },
@@ -237,8 +237,8 @@ function startEventRound(channel, eventData) {
         }
         
         const endEmbed = new EmbedBuilder()
-            .setTitle('🏆 انتهى الإيفنت!')
-            .setDescription('**🎮 النتائج النهائية:**\n\n' + leaderboardText)
+            .setTitle('انتهى لبى العين')
+            .setDescription('**🎮 النتايج النهائية:**\n\n' + leaderboardText)
             .setColor('#FFD700')
             .setFooter({ text: `إجمالي الجولات: ${eventData.totalRounds}` })
             .setTimestamp();
@@ -267,7 +267,7 @@ function startEventRound(channel, eventData) {
     // مؤقت 15 ثانية
     const timeout = setTimeout(() => {
         if (activeGames.has(channel.id) && activeGames.get(channel.id).country === randomCountry) {
-            channel.send(`⏰ **انتهى الوقت!**\n✅ الإجابة الصحيحة: **${randomCountry.name}**`);
+            channel.send(`⏰ **خلص الوقت!**\n✅ الإجابة الصحيحة: **${randomCountry.name}**`);
             activeGames.delete(channel.id);
             
             // بدء الجولة التالية بعد 3 ثواني
@@ -289,7 +289,7 @@ client.on('messageCreate', message => {
     // ==================== أمر إيفنت الأعلام ====================
     if (message.content === '-ايفنت اعلام' || message.content === '!event flags') {
         if (eventGames.has(message.channel.id)) {
-            message.reply('⚠️ في إيفنت شغال حالياً!');
+            message.reply('⚠️ فيه ايفنت شغال');
             return;
         }
 
@@ -297,7 +297,7 @@ client.on('messageCreate', message => {
             .setTitle('🎮 إيفنت الأعلام')
             .setDescription('**كم عدد الجولات؟**\nاكتب رقم من **1** إلى **50**')
             .setColor('#00D9FF')
-            .setFooter({ text: 'لديك 30 ثانية للرد' })
+            .setFooter({ text: 'عندك 30 ثانيه ترد فيها' })
             .setTimestamp();
 
         message.reply({ embeds: [setupEmbed] });
@@ -309,7 +309,7 @@ client.on('messageCreate', message => {
             const rounds = parseInt(m.content);
             
             if (rounds < 1 || rounds > 50) {
-                message.channel.send('❌ الرقم يجب أن يكون بين 1 و 50!');
+                message.channel.send('ماتشوف انت مكتوب من 1 الى 50 طالع عدل');
                 return;
             }
             
@@ -323,8 +323,8 @@ client.on('messageCreate', message => {
             eventGames.set(message.channel.id, eventData);
             
             const startEmbed = new EmbedBuilder()
-                .setTitle('🎮 بدء الإيفنت!')
-                .setDescription(`**📊 عدد الجولات:** ${rounds}\n**👤 بدأ بواسطة:** ${message.author}\n\n⏰ سيبدأ الإيفنت خلال **3 ثواني**...`)
+                .setTitle('🎮 بدء الايفنت!')
+                .setDescription(`**📊 عدد الجولات:** ${rounds}\n**👤 اللي بدا الايفنت:** ${message.author}\n\n⏰ بيبدأ الايفنت خلال **3 ثواني**...`)
                 .setColor('#00FF00')
                 .setTimestamp();
             
@@ -337,7 +337,7 @@ client.on('messageCreate', message => {
         
         collector.on('end', collected => {
             if (collected.size === 0) {
-                message.channel.send('⏰ انتهى الوقت! لم يتم اختيار عدد الجولات.');
+                message.channel.send('انتهى الوقت ما اخترت عدد الجولات');
             }
         });
         
@@ -347,13 +347,13 @@ client.on('messageCreate', message => {
     // ==================== أمر إلغاء الإيفنت ====================
     if (message.content === '-الغاء ايفنت' || message.content === '!cancel event') {
         if (!eventGames.has(message.channel.id)) {
-            message.reply('❌ لا يوجد إيفنت نشط!');
+            message.reply('مافيه ايفنت شغال اصلا');
             return;
         }
         
         const eventData = eventGames.get(message.channel.id);
         if (message.author.id !== eventData.startedBy && !message.member.permissions.has('ManageMessages')) {
-            message.reply('❌ فقط من بدأ الإيفنت أو المشرف يقدر يلغيه!');
+            message.reply('بس اللي بدا الايفنت او اللي معه رول يقدر يطفيه');
             return;
         }
         
@@ -371,12 +371,12 @@ client.on('messageCreate', message => {
     // ==================== أمر لعبة فردية ====================
     if (message.content === '-اعلام' || message.content === '!flag') {
         if (eventGames.has(message.channel.id)) {
-            message.reply('⚠️ في إيفنت شغال حالياً! استخدم `-الغاء ايفنت` لإلغائه.');
+            message.reply('⚠️ فيه ايفنت يشتغل الحين استخدم `-الغاء ايفنت` عشان تطفيه.');
             return;
         }
         
         if (activeGames.has(message.channel.id)) {
-            message.reply('⚠️ في لعبة شغالة حالياً! جاوب على السؤال الحالي أول.');
+            message.reply('فيه لعبة تشتغل الحين جاوب على السؤال الحالي أول');
             return;
         }
 
@@ -396,7 +396,7 @@ client.on('messageCreate', message => {
             if (activeGames.has(message.channel.id)) {
                 const game = activeGames.get(message.channel.id);
                 message.channel.send({
-                    content: `⏰ **انتهى الوقت!**\n❌ لم يجب أحد بشكل صحيح\n✅ الإجابة الصحيحة: **${game.country.name}**`
+                    content: `⏰ **انتهى الوقت!**\n❌ محد جاوب\n✅ الاجابة الصحيحة: **${game.country.name}**`
                 });
                 activeGames.delete(message.channel.id);
             }
@@ -434,7 +434,7 @@ client.on('messageCreate', message => {
                 
                 eventData.scores.sort((a, b) => b.points - a.points);
                 
-                message.reply(`🎉 إجابة صحيحة! **${message.author}** شطوووور!\n✅ الإجابة: **${game.country.name}**\n⏱️ الوقت: **${timeTaken}** ثانية\n🏆 نقاطك: **${userScore ? userScore.points : 1}**`);
+                message.reply(`😽 صح عليك **${message.author}** شطوووور\n`);
                 
                 activeGames.delete(message.channel.id);
                 
@@ -444,7 +444,7 @@ client.on('messageCreate', message => {
                     }
                 }, 3000);
             } else {
-                message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
+                message.reply(`😽 صح عليك **${message.author}** شطوووور`);
                 activeGames.delete(message.channel.id);
             }
         }
@@ -456,9 +456,9 @@ client.on('messageCreate', message => {
             .setTitle('📖 قائمة الأوامر')
             .setDescription('**أوامر بوت الأعلام:**')
             .addFields(
-                { name: '-اعلام أو !flag', value: 'بدء لعبة علم واحد', inline: false },
-                { name: '-ايفنت اعلام أو !event flags', value: 'بدء إيفنت متعدد الجولات مع نظام نقاط', inline: false },
-                { name: '-الغاء ايفنت أو !cancel event', value: 'إلغاء الإيفنت النشط', inline: false },
+                { name: '-اعلام أو !flag', value: 'تشغيل اللعبة', inline: false },
+                { name: '-ايفنت اعلام أو !event flags', value: 'بدء إيفنت متعدد الجولات', inline: false },
+                { name: '-الغاء ايفنت أو !cancel event', value: 'إلغاء الإيفنت', inline: false },
                 { name: '!مساعدة أو !help', value: 'عرض هذه القائمة', inline: false }
             )
             .setColor('#3498db')
@@ -478,6 +478,7 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
+
 
 
 
