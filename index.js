@@ -298,7 +298,7 @@ client.on('messageCreate', message => {
     // =========================
     if (args[0] === '-اعلام' && args.length === 1) {
         // لو فيه إيفنت شغال لا تسوي شي
-        if (activeEvents.has(message.channel.id)) return;
+        if (activeGames.has(message.channel.id)) return;
 
         return sendSingleFlag(message);
     }
@@ -503,4 +503,5 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
+
 
