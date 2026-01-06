@@ -287,8 +287,8 @@ client.on('messageCreate', message => {
     if (message.author.bot) return;
     const args = message.content.trim().split(/\s+/);
         if (args[0] === '-اعلام' && args.length === 1) {
-        if (activeEvents.has(message.channel.id)) return;
         if (activeGames.has(message.channel.id)) return;
+        if (eventGames.has(message.channel.id)) return;
 
         // كود لعبة الأعلام العادية
     }
@@ -494,6 +494,7 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
+
 
 
 
