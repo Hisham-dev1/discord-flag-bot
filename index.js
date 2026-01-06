@@ -224,153 +224,174 @@ const countries = [
 
 ];
 
-/* ================= STORAGE ================= */
-const activeGames = new Map();
+// =======================
+// إدارة الإيفنت
+// =======================
 const activeEvents = new Map();
 
-/* ================= READY ================= */
-client.once('ready', () => {
-    console.log(`✅ Logged in as ${client.user.tag}`);
-});
+// =======================
+// لعبة علم واحد
+// =======================
+async function sendSingleFlag(message) {
+    const flag = flags[Math.floor(Math.random() * flags.length)];
 
-/* ================= MESSAGE ================= */
-client.on('messageCreate', message => {
-    if (message.author.bot) return;
-    const args = message.content.split(" ");
+    const embed = new EmbedBuilder()
+        .setTitle('🇺🇳 ما اسم هذه الدولة؟')
+        .setImage('attachment://flag.png')
+        .setColor('Random');
 
-    /* ========= SINGLE GAME ========= */
-    if (message.content === '-اعلام') {
-        if (activeGames.has(message.channel.id)) return message.reply('⚠️ في لعبة شغالة');
+    await message.channel.send({
+        embeds: [embed],
+        files: [{ attachment: flag.flag, name: 'flag.png' }]
+    });
 
-        const country = countries[Math.floor(Math.random() * countries.length)];
-        activeGames.set(message.channel.id, country);
+    const filter = m => {
+        const answer = m.content.toLowerCase();
+        return [flag.name.toLowerCase(), ...flag.alternatives.map(a => a.toLowerCase())].includes(answer);
+    };
 
-        message.channel.send({ files: [country.flag] });
+    const collector = message.channel.createMessageCollector({ filter, time: 15000 });
 
-        const timeout = setTimeout(() => {
-            message.channel.send(`⏰ انتهى الوقت\n✅ الإجابة: **${country.name}**`);
-            activeGames.delete(message.channel.id);
-        }, 15000);
+    collector.on('collect', m => {
+        m.reply(`✅ صح! الإجابة: **${flag.name}**`);
+        collector.stop();
+    });
+}
 
-        country.timeout = timeout;
-        return;
-    }
+// =======================
+// إيفنت الأعلام
+// =======================
+async function startFlagEvent(message, totalRounds) {
+    let currentRound = 0;
+    const scores = {};
+    const channelId = message.channel.id;
 
-    if (activeGames.has(message.channel.id)) {
-        const game = activeGames.get(message.channel.id);
-        const answer = message.content.toLowerCase().trim();
-        const valid = [game.name.toLowerCase(), ...game.alternatives.map(a => a.toLowerCase())];
+    activeEvents.set(channelId, {
+        game: null,
+        ended: false
+    });
 
-        if (valid.includes(answer)) {
-            clearTimeout(game.timeout);
-            message.reply('😽😽 شطوووور');
-            activeGames.delete(message.channel.id);
+    message.channel.send(`🎉 بدأ **إيفنت الأعلام** | عدد الجولات: **${totalRounds}**`);
+
+    const nextRound = async () => {
+        const event = activeEvents.get(channelId);
+        if (!event || event.ended) return;
+
+        if (currentRound >= totalRounds) {
+            endEvent();
+            return;
         }
-        return;
-    }
 
-    /* ========= EVENT START ========= */
-    if (args[0] === '-ايفنت' && args[1] === 'اعلام') {
-        if (activeEvents.has(message.channel.id))
-            return message.reply('⚠️ فيه إيفنت شغال');
+        currentRound++;
 
-        const rounds = parseInt(args[2]) || 5;
+        const flag = flags[Math.floor(Math.random() * flags.length)];
+        event.game = flag;
 
-        const eventData = {
-            rounds,
-            currentRound: 0,
-            leaderboard: new Map(),
-            game: null,
-            timeout: null,
-            ended: false
-        };
+        const embed = new EmbedBuilder()
+            .setTitle(`🌍 الجولة ${currentRound} / ${totalRounds}`)
+            .setDescription('اكتب اسم الدولة')
+            .setImage('attachment://flag.png')
+            .setColor('Blue');
 
-        activeEvents.set(message.channel.id, eventData);
+        await message.channel.send({
+            embeds: [embed],
+            files: [{ attachment: flag.flag, name: 'flag.png' }]
+        });
 
-        message.channel.send(`🎉 **بدأ إيفنت الأعلام**\n🕹️ عدد الجولات: **${rounds}**`);
+        event.roundTimeout = setTimeout(() => {
+            event.game = null;
+            message.channel.send(`⏰ انتهى الوقت! الإجابة: **${flag.name}**`);
+            setTimeout(nextRound, 3000);
+        }, 15000);
+    };
 
-        const playRound = () => {
-            if (eventData.ended) return;
+    const endEvent = () => {
+        const event = activeEvents.get(channelId);
+        if (!event) return;
 
-            if (eventData.currentRound >= eventData.rounds) {
-                const sorted = [...eventData.leaderboard.entries()]
-                    .sort((a, b) => b[1] - a[1]);
+        event.ended = true;
+        clearTimeout(event.roundTimeout);
+        activeEvents.delete(channelId);
 
-                const embed = new EmbedBuilder()
-                    .setTitle('🏁 انتهى الإيفنت')
-                    .setColor('#2ecc71')
-                    .setDescription(
-                        sorted.length
-                            ? sorted.map((e, i) => {
-                                const medals = ['🥇', '🥈', '🥉'];
-                                return `${medals[i] || '🎯'} **${e[0]}** — ${e[1]} نقطة`;
-                            }).join('\n')
-                            : '❌ ما فيه إجابات صحيحة'
-                    )
-                    .setFooter({ text: 'شكراً لمشاركتكم ❤️' });
+        const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
 
-                message.channel.send({ embeds: [embed] });
-                activeEvents.delete(message.channel.id);
-                return;
-            }
+        let result = '🏁 **انتهى الإيفنت!**\n\n';
+        if (sorted.length === 0) {
+            result += '❌ ما أحد جاوب صح';
+        } else {
+            sorted.forEach(([user, score], i) => {
+                result += `${i + 1}. <@${user}> — **${score}** نقطة\n`;
+            });
+        }
 
-            eventData.currentRound++;
+        message.channel.send(result);
+    };
 
-            const country = countries[Math.floor(Math.random() * countries.length)];
-            eventData.game = country;
+    nextRound();
 
-            message.channel.send(`🎯 الجولة ${eventData.currentRound}/${eventData.rounds}`);
-            message.channel.send({ files: [country.flag] });
+    // مستمع الإجابات
+    client.on('messageCreate', msg => {
+        if (msg.channel.id !== channelId || msg.author.bot) return;
 
-            eventData.timeout = setTimeout(() => {
-                if (eventData.ended) return;
-                message.channel.send(`⏰ انتهى الوقت\n✅ الإجابة: **${country.name}**`);
-                eventData.game = null;
-                setTimeout(playRound, 3000);
-            }, 15000);
-        };
+        const event = activeEvents.get(channelId);
+        if (!event || !event.game || event.ended) return;
 
-        eventData.playRound = playRound;
-        playRound();
-        return;
-    }
+        const game = event.game;
+        const answer = msg.content.toLowerCase();
 
-    /* ========= EVENT ANSWER ========= */
-    if (activeEvents.has(message.channel.id)) {
-        const event = activeEvents.get(message.channel.id);
-        if (!event.game || event.ended) return;
-
-        const answer = message.content.toLowerCase().trim();
         const valid = [
-            event.game.name.toLowerCase(),
-            ...event.game.alternatives.map(a => a.toLowerCase())
+            game.name.toLowerCase(),
+            ...game.alternatives.map(a => a.toLowerCase())
         ];
 
-        if (valid.includes(answer)) {
-            clearTimeout(event.timeout);
+        if (!valid.includes(answer)) return;
 
-            const user = message.author.username;
-            event.leaderboard.set(user, (event.leaderboard.get(user) || 0) + 1);
+        // قفل الجولة
+        clearTimeout(event.roundTimeout);
+        event.game = null;
 
-            message.reply('😽😽 شطوووور');
-            event.game = null;
+        scores[msg.author.id] = (scores[msg.author.id] || 0) + 1;
 
-            setTimeout(event.playRound, 3000);
-        }
-        return;
-    }
+        msg.reply(`✅ صح! **${game.name}** (+1)`);
 
-    /* ========= CANCEL ========= */
+        setTimeout(nextRound, 3000);
+    });
+}
+
+// =======================
+// استقبال الأوامر
+// =======================
+client.on('messageCreate', message => {
+    if (message.author.bot) return;
+
+    const args = message.content.split(' ');
+
+    // إلغاء الإيفنت
     if (message.content === '-الغاء ايفنت') {
-        if (!activeEvents.has(message.channel.id))
-            return message.reply('❌ ما فيه إيفنت');
-
         const event = activeEvents.get(message.channel.id);
+        if (!event) return message.reply('❌ ما فيه إيفنت شغال');
+
         event.ended = true;
-        if (event.timeout) clearTimeout(event.timeout);
+        clearTimeout(event.roundTimeout);
         activeEvents.delete(message.channel.id);
 
-        message.reply('🛑 تم إلغاء الإيفنت');
+        return message.channel.send('🛑 تم إلغاء الإيفنت');
+    }
+
+    // إيفنت أعلام
+    if (args[0] === '-ايفنت' && args[1] === 'اعلام') {
+        if (activeEvents.has(message.channel.id)) {
+            return message.reply('⚠️ فيه إيفنت شغال بالفعل');
+        }
+
+        const rounds = parseInt(args[2]) || 5;
+        return startFlagEvent(message, rounds);
+    }
+
+    // لعبة علم واحد (تتوقف وقت الإيفنت)
+    if (message.content === '-اعلام') {
+        if (activeEvents.has(message.channel.id)) return;
+        return sendSingleFlag(message);
     }
 });
 
@@ -379,5 +400,4 @@ client.on('messageCreate', message => {
     await extractFlags();
     client.login(process.env.TOKEN);
 })();
-
 
