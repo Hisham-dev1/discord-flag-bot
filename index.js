@@ -2,7 +2,6 @@ const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const http = require("http");
 const PORT = process.env.PORT || 3000;
-const unzipper = require("unzipper");
 
 http.createServer((req, res) => {
     res.writeHead(200);
@@ -10,6 +9,7 @@ http.createServer((req, res) => {
 }).listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 });
+const unzipper = require("unzipper");
 
 const zipPath = "./flag-cards.zip";
 const extractPath = "./flag-cards";
@@ -45,6 +45,7 @@ const client = new Client({
     ]
 });
 
+// قائمة الدول مع مسارات أعلامها من flag-cards
 const countries = [
 
     /* ================= الدول العربية ================= */
@@ -234,43 +235,60 @@ const countries = [
 
 ];
 
+// تخزين اللعبة النشطة لكل قناة
 const activeGames = new Map();
-const activeEvents = new Map();
 
 client.once('ready', () => {
     console.log(`✅ البوت شغال! تم تسجيل الدخول كـ ${client.user.tag}`);
     console.log(`🎮 عدد الأعلام المتاحة: ${countries.length} علم`);
 });
 
-// --- التعامل مع الرسائل ---
+// أمر بدء اللعبة
 client.on('messageCreate', message => {
     if (message.author.bot) return;
-    const args = message.content.split(" ");
 
-    // --- لعبة علم واحدة ---
+    // بدء اللعبة
     if (message.content === '-اعلام' || message.content === '!flag') {
         if (activeGames.has(message.channel.id)) {
             message.reply('⚠️ في لعبة شغالة حالياً! جاوب على السؤال الحالي أول.');
             return;
         }
 
+        // اختيار دولة عشوائية
         const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-        activeGames.set(message.channel.id, { country: randomCountry, startTime: Date.now() });
-        message.channel.send({ files: [randomCountry.flag] });
 
+        // حفظ اللعبة النشطة
+        activeGames.set(message.channel.id, {
+            country: randomCountry,
+            startTime: Date.now()
+        });
+
+        // إرسال العلم
+        message.channel.send({
+            files: [randomCountry.flag]
+        });
+
+        // مؤقت 15 ثانية
         const timeout = setTimeout(() => {
+            // التحقق إذا اللعبة لسه موجودة (يعني ما أحد جاوب)
             if (activeGames.has(message.channel.id)) {
                 const game = activeGames.get(message.channel.id);
-                message.channel.send(`⏰ **انتهى الوقت!**\n❌ لم يجب أحد بشكل صحيح\n✅ الإجابة الصحيحة: **${game.country.name}**`);
+
+                message.channel.send({
+                    content: `⏰ **انتهى الوقت!**\n❌ لم يجب أحد بشكل صحيح\n✅ الإجابة الصحيحة: **${game.country.name}**`
+                });
+
                 activeGames.delete(message.channel.id);
             }
-        }, 15000);
+        }, 15000); // 15 ثانية
 
+        // حفظ الـ timeout مع اللعبة عشان نقدر نلغيه لو أحد جاوب
         activeGames.get(message.channel.id).timeout = timeout;
+
         return;
     }
 
-    // --- التحقق من الإجابة في لعبة فردية ---
+    // التحقق من الإجابة
     if (activeGames.has(message.channel.id)) {
         const game = activeGames.get(message.channel.id);
         const userAnswer = message.content.toLowerCase().trim();
@@ -279,96 +297,28 @@ client.on('messageCreate', message => {
             ...game.country.alternatives.map(alt => alt.toLowerCase())
         ];
 
+        // التحقق من الإجابة
         if (correctAnswers.includes(userAnswer)) {
-            if (game.timeout) clearTimeout(game.timeout);
+            const timeTaken = ((Date.now() - game.startTime) / 1000).toFixed(1);
+
+            // إلغاء الـ timeout لأن أحد جاوب صح
+            if (game.timeout) {
+                clearTimeout(game.timeout);
+            }
+
             message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
             activeGames.delete(message.channel.id);
         }
-        return;
     }
 
-    // --- بدء إيفنت أعلام ---
-    if ((args[0] === '-ايفنت' || args[0] === '!event') && args[1] === 'اعلام') {
-        if (activeEvents.has(message.channel.id)) {
-            message.reply('⚠️ في إيفنت شغال حالياً! استخدم -الغاء ايفنت لإيقافه.');
-            return;
-        }
-
-        const rounds = parseInt(args[2]) || 5;
-        const leaderboard = new Map();
-        let currentRound = 0;
-
-        message.channel.send(`🎉 بدأ إيفنت الأعلام! عدد الجولات: **${rounds}**`);
-
-        const playRound = () => {
-            if (currentRound >= rounds) {
-                let results = '';
-                if (leaderboard.size === 0) results = 'لم يجب أحد بشكل صحيح 😅';
-                else leaderboard.forEach((score, user) => { results += `**${user}**: ${score} إجابة صحيحة\n`; });
-
-                message.channel.send(`🏁 انتهى الإيفنت!\n\n**ملخص النتائج:**\n${results}`);
-                activeEvents.delete(message.channel.id);
-                return;
-            }
-
-            const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-            const eventGame = { country: randomCountry, startTime: Date.now(), timeout: null };
-
-            activeEvents.set(message.channel.id, { game: eventGame, leaderboard, currentRound, rounds, playRound });
-
-            message.channel.send({ files: [randomCountry.flag] });
-
-            eventGame.timeout = setTimeout(() => {
-                message.channel.send(`⏰ **انتهى الوقت للجولة ${currentRound + 1}!**\n❌ الإجابة الصحيحة: **${randomCountry.name}**`);
-                currentRound++;
-                setTimeout(playRound, 3000);
-            }, 15000);
-        };
-
-        playRound();
-        return;
-    }
-
-    // --- التحقق من الإجابة في الإيفنت ---
-    if (activeEvents.has(message.channel.id)) {
-        const eventData = activeEvents.get(message.channel.id);
-        const game = eventData.game;
-        const leaderboard = eventData.leaderboard;
-        const userAnswer = message.content.toLowerCase().trim();
-        const correctAnswers = [game.country.name.toLowerCase(), ...game.country.alternatives.map(alt => alt.toLowerCase())];
-
-        if (correctAnswers.includes(userAnswer)) {
-            if (game.timeout) clearTimeout(game.timeout);
-            const prevScore = leaderboard.get(message.author.username) || 0;
-            leaderboard.set(message.author.username, prevScore + 1);
-            message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
-            eventData.currentRound++;
-            setTimeout(eventData.playRound, 3000);
-        }
-        return;
-    }
-
-    // --- إلغاء الإيفنت ---
-    if (message.content === '-الغاء ايفنت' || message.content === '!cancel event') {
-        if (activeEvents.has(message.channel.id)) {
-            const eventData = activeEvents.get(message.channel.id);
-            if (eventData.game.timeout) clearTimeout(eventData.game.timeout);
-            activeEvents.delete(message.channel.id);
-            message.reply('❌ تم إلغاء الإيفنت بنجاح!');
-        } else {
-            message.reply('⚠️ لا يوجد إيفنت نشط في هذه القناة.');
-        }
-        return;
-    }
-
-    // --- أمر المساعدة ---
+    // أمر المساعدة
     if (message.content === '!help' || message.content === '!مساعدة') {
         const helpEmbed = new EmbedBuilder()
             .setTitle('📖 قائمة الأوامر')
             .setDescription('**أوامر بوت الأعلام:**')
             .addFields(
                 { name: '-اعلام أو !flag', value: 'بدء لعبة علم واحد', inline: false },
-                { name: '-ايفنت اعلام أو !event flags [عدد الجولات]', value: 'بدء إيفنت متعدد الجولات', inline: false },
+                { name: '-ايفنت اعلام أو !event flags', value: 'بدء إيفنت متعدد الجولات', inline: false },
                 { name: '-الغاء ايفنت أو !cancel event', value: 'إلغاء الإيفنت النشط', inline: false },
                 { name: '!مساعدة أو !help', value: 'عرض هذه القائمة', inline: false }
             )
@@ -379,11 +329,11 @@ client.on('messageCreate', message => {
     }
 });
 
-// تسجيل الدخول
+// تسجيل الدخول - ضع التوكن هنا
 (async () => {
     try {
-        await extractFlags();
-        client.login(process.env.TOKEN);
+        await extractFlags(); // ننتظر لحد ما يخلص فك الضغط
+        client.login(process.env.TOKEN); // بعدين نشغل البوت
     } catch (error) {
         console.error('فشل فك الضغط:', error);
         process.exit(1);
