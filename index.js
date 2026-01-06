@@ -35,7 +35,7 @@ const client = new Client({
 });
 
 /* ================= COUNTRIES ================= */
-const countries = [
+const flags = [
 
     /* ================= الدول العربية ================= */
     { name: 'السعودية', flag: './flag-cards/sa.png', alternatives: ['saudi arabia', 'سعودية', 'المملكة'] },
@@ -400,4 +400,5 @@ client.on('messageCreate', message => {
     await extractFlags();
     client.login(process.env.TOKEN);
 })();
+
 
