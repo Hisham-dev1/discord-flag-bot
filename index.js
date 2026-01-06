@@ -285,25 +285,8 @@ function startEventRound(channel, eventData) {
 // ==================== الأوامر ====================
 client.on('messageCreate', message => {
     if (message.author.bot) return;
-    const args = message.content.trim().split(/\s+/);
-    // =========================
-    // إيفنت الأعلام
-    // =========================
-    if (args[0] === '-ايفنت' && args[1] === 'اعلام') {
-        return startEventRound(message, args[2]);
-    }
 
-    // =========================
-    // لعبة الأعلام الفردية
-    // =========================
-    if (args[0] === '-اعلام' && args.length === 1) {
-        // لو فيه إيفنت شغال لا تسوي شي
-        if (activeGames.has(message.channel.id)) return;
-
-        return sendSingleFlag(message);
-    }
-
-    // ==================== أمر إيفنت الأعلام (المضاف) ====================
+    // ==================== أمر إيفنت الأعلام ====================
     if (message.content === '-ايفنت اعلام' || message.content === '!event flags') {
         if (eventGames.has(message.channel.id)) {
             message.reply('⚠️ في إيفنت شغال حالياً!');
@@ -319,7 +302,6 @@ client.on('messageCreate', message => {
 
         message.reply({ embeds: [setupEmbed] });
         
-        // انتظار رد المستخدم
         const filter = m => m.author.id === message.author.id && !isNaN(m.content);
         const collector = message.channel.createMessageCollector({ filter, time: 30000, max: 1 });
         
@@ -331,7 +313,6 @@ client.on('messageCreate', message => {
                 return;
             }
             
-            // إنشاء الإيفنت
             const eventData = {
                 totalRounds: rounds,
                 currentRound: 0,
@@ -349,7 +330,6 @@ client.on('messageCreate', message => {
             
             message.channel.send({ embeds: [startEmbed] });
             
-            // بدء الإيفنت بعد 3 ثواني
             setTimeout(() => {
                 startEventRound(message.channel, eventData);
             }, 3000);
@@ -364,7 +344,7 @@ client.on('messageCreate', message => {
         return;
     }
 
-    // ==================== أمر إلغاء الإيفنت (المضاف) ====================
+    // ==================== أمر إلغاء الإيفنت ====================
     if (message.content === '-الغاء ايفنت' || message.content === '!cancel event') {
         if (!eventGames.has(message.channel.id)) {
             message.reply('❌ لا يوجد إيفنت نشط!');
@@ -388,10 +368,9 @@ client.on('messageCreate', message => {
         return;
     }
 
-    // ==================== أمر لعبة فردية (الأصلي) ====================
-    if (args[0] === '-اعلام' && args.length === 1) {
-        if (eventGames.has(message.channel.id))
-        {
+    // ==================== أمر لعبة فردية ====================
+    if (message.content === '-اعلام' || message.content === '!flag') {
+        if (eventGames.has(message.channel.id)) {
             message.reply('⚠️ في إيفنت شغال حالياً! استخدم `-الغاء ايفنت` لإلغائه.');
             return;
         }
@@ -443,7 +422,6 @@ client.on('messageCreate', message => {
                 clearTimeout(game.timeout);
             }
 
-            // إذا كان إيفنت، نضيف النقاط (المضاف)
             if (game.isEvent && eventGames.has(message.channel.id)) {
                 const eventData = eventGames.get(message.channel.id);
                 const userScore = eventData.scores.find(s => s.userId === message.author.id);
@@ -454,28 +432,25 @@ client.on('messageCreate', message => {
                     eventData.scores.push({ userId: message.author.id, points: 1 });
                 }
                 
-                // ترتيب النقاط
                 eventData.scores.sort((a, b) => b.points - a.points);
                 
                 message.reply(`🎉 إجابة صحيحة! **${message.author}** شطوووور!\n✅ الإجابة: **${game.country.name}**\n⏱️ الوقت: **${timeTaken}** ثانية\n🏆 نقاطك: **${userScore ? userScore.points : 1}**`);
                 
                 activeGames.delete(message.channel.id);
                 
-                // بدء الجولة التالية بعد 3 ثواني
                 setTimeout(() => {
                     if (eventGames.has(message.channel.id)) {
                         startEventRound(message.channel, eventData);
                     }
                 }, 3000);
             } else {
-                // لعبة فردية عادية (الأصلي)
                 message.reply(`😽 إجابة صحيحة! **${message.author}** شطوووور!`);
                 activeGames.delete(message.channel.id);
             }
         }
     }
 
-    // ==================== أمر المساعدة (محدّث) ====================
+    // ==================== أمر المساعدة ====================
     if (message.content === '!help' || message.content === '!مساعدة') {
         const helpEmbed = new EmbedBuilder()
             .setTitle('📖 قائمة الأوامر')
@@ -503,5 +478,6 @@ client.on('messageCreate', message => {
         process.exit(1);
     }
 })();
+
 
 
