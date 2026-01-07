@@ -468,17 +468,21 @@ client.on('messageCreate', message => {
         message.reply({ embeds: [helpEmbed] });
     }
 });
+client.on("error", console.error);
+client.on("shardError", console.error);
 
 // تسجيل الدخول
 (async () => {
     try {
         await extractFlags();
+        console.log("TOKEN موجود؟", !!process.env.TOKEN);
         client.login(process.env.TOKEN);
     } catch (error) {
         console.error('فشل فك الضغط:', error);
         process.exit(1);
     }
 })();
+
 
 
 
